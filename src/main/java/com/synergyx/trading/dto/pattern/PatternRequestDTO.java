@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+// 패턴 생성, 수정
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PatternRequestDTO {
     private String patternName; // 패턴 이름
-//    private String symbol; // 종목 코드
     private List<Double> points; // 좌표
     private Double tolerance; // 오차 범위
     private Integer periodValue; // 기간 수치

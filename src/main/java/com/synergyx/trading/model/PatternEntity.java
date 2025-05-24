@@ -37,19 +37,17 @@ public class PatternEntity {
     @LastModifiedDate
     private LocalDateTime updatedAt; // 수정 일시
 
-    //    임시 데이터 -> 나중에 종목/유저 엔티티 생성 후 수정
-    private String symbol; // 종목 심볼
-    private String stockId; // 종목 아이디
+    // 적용된 종목 목록 (중간 엔티티 통해)
+    @OneToMany(mappedBy = "pattern")
+    private List<PatternApplyEntity> patternApplies;
+
+    // 임시 데이터 -> 유저 엔티티 생성 후 수정
+    @Column(name = "user_id")
     private String userId; // 사용자 아이디
 
-//    // 종목 테이블 매핑
+    // 사용자 테이블 매핑
 //    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "stockId")
-//    private StockEntity stock;
-
-//    // 사용자 테이블 매핑
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "userId")
+//    @JoinColumn(name = "user_id")
 //    private UserEntity user;
 }
 

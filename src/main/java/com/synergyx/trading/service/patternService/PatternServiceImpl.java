@@ -87,6 +87,8 @@ public class PatternServiceImpl implements PatternService {
                 .maxReturnDate(bt.getMaxReturnDate())
                 .build()).orElse(null);
 
+        List<PatternApplyEntity> applyList = patternApplyRepository.findByPatternId(patternId);
+
         // 임시 목데이터 생성. -> 종목 엔티티 구현 후 코드 제거 예정
         List<PatternResponseDTO.AppliedStockDTO> appliedStocks = List.of(
                 PatternResponseDTO.AppliedStockDTO.builder()
@@ -102,7 +104,6 @@ public class PatternServiceImpl implements PatternService {
         );
 
 //        종목 엔티티 구현 후 캡션 제거
-//        List<PatternApplyEntity> applyList = patternApplyRepository.findByPatternId(patternId);
 //        List<PatternResponseDTO.AppliedStockDTO> appliedStocks = applyList.stream()
 //                .map(apply -> PatternResponseDTO.AppliedStockDTO.builder()
 //                        .symbol(apply.getStock().getSymbol())

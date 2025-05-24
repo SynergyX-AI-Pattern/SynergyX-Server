@@ -3,8 +3,6 @@ package com.synergyx.trading.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Entity
 @Table(name = "pattern_apply")
 @Getter

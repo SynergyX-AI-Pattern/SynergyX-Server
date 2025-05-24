@@ -7,10 +7,7 @@ import com.synergyx.trading.dto.backtest.BacktestResponseDTO;
 import com.synergyx.trading.service.backtestService.BacktestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-
-import java.awt.print.Pageable;
 
 @RestController
 @RequiredArgsConstructor

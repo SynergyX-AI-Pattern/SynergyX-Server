@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public class PatternResponseDTO {
@@ -42,10 +44,14 @@ public class PatternResponseDTO {
         private String symbol; // 종목 코드
         private String stockName; // 종목 이름
         private String stockImage; // 종목 이미지
-        private String executedAt; // 백테스팅 실행 날짜
+        private LocalDate executedAt; // 백테스팅 실행 날짜
+        private Integer matchedCount; // 패턴 매칭 횟수
+        private LocalDate startDate; // 백테스트 시작일
+        private LocalDate endDate; // 백테스트 종료일
         private Double winRate; // 승률
         private Double averageReturn; // 평균 수익률
-        private Integer matchedCount; // 패턴 매칭 횟수
+        private Double maxReturn; // 최대 수익률
+        private LocalDate maxReturnDate; // 최대 수익률 발생일
     }
 
     // 패턴 적용된 종목 리스트

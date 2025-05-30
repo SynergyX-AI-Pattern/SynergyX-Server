@@ -5,13 +5,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-// 패턴 적용
 public class PatternApplyRequestDTO {
-    private Long patternId;
-    private Long stockId;
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    // 패턴 적용
+    public static class PatternApplyDTO {
+        private Long patternId; // 패턴 아이디
+        private Long stockId; // 종목 아이디
+    }
 }
 

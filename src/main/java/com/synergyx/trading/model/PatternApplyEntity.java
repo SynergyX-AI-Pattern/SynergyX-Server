@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "pattern_apply")
 @Getter
 @Setter
+@Table(name = "pattern_apply")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,6 +33,9 @@ public class PatternApplyEntity {
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "stock_id")
 //    private StockEntity stock;
+
+    @Column(name = "is_alert_enabled", nullable = false)
+    private Boolean isAlertEnabled; // 알림 설정 여부
 
 }
 

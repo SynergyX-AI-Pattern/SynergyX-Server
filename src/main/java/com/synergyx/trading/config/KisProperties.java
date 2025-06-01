@@ -1,17 +1,25 @@
 package com.synergyx.trading.config;
 
-import com.querydsl.core.annotations.Config;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @ConfigurationProperties(prefix = "kis")
+@Configuration
 @Getter
 @Setter
 public class KisProperties {
     private String appKey;
     private String appSecret;
-    private String accessToken;
+    @PostConstruct
+    public void printKeys() {
+        log.info("✅ KIS AppKey = {}", appKey);
+        log.info("✅ KIS AppSecret = {}", appSecret); // todo: delete
+    }
 }

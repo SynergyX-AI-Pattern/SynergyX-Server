@@ -25,6 +25,7 @@ public class KisCommandServiceImpl implements KisCommandService {
 
     @Transactional
     public void fetchAndSaveKospi100() {
+        /**
         List<KisStockDTO> stockDtos = kisClient.getKospi100Stocks();
 
         for (KisStockDTO dto : stockDtos) {
@@ -64,5 +65,6 @@ public class KisCommandServiceImpl implements KisCommandService {
                 stockOhlcvRepository.save(ohlcv);
             }
         }
+         */
     }
 }

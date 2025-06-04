@@ -1,0 +1,45 @@
+package com.synergyx.trading.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "user")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 255)
+    private String password;
+
+    @Column(nullable = false, length = 20)
+    private String username;
+
+    @Column(length = 255)
+    private String image;
+
+    @Column(nullable = false)
+    private boolean agreeMarketing;
+
+    @Column(nullable = false)
+    private boolean agreeEvent;
+
+    @Column(nullable = false)
+    private boolean pushEnabled;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String accessToken;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String refreshToken;
+
+    @Column(columnDefinition = "TEXT")
+    private String fcmToken;
+}

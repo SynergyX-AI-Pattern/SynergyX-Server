@@ -1,5 +1,6 @@
 package com.synergyx.trading.model;
 
+import com.synergyx.trading.model.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,11 +12,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StockDetail {
+public class StockDetail extends BaseEntity {
 
     @Id
     @Column(name = "stock_id")
-    private Integer stockId;
+    private Long stockId;
 
     @MapsId
     @OneToOne(fetch = FetchType.LAZY)
@@ -23,14 +24,8 @@ public class StockDetail {
     private Stock stock;
 
     @Column(nullable = false)
-    private Float price;
+    private Double price;
 
     @Column(name = "financial_data", columnDefinition = "json", nullable = false)
     private String financialData;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
 }

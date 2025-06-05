@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 
 @Repository
-public interface StockOhlcvRepository extends JpaRepository<StockOhlcv, Integer> {
-    boolean existsByStockIdAndTimestamp(Integer stockId, LocalDateTime timestamp);
+public interface StockOhlcvRepository extends JpaRepository<StockOhlcv, Long> {
+    boolean existsByStockIdAndTimestamp(Long stockId, LocalDateTime timestamp);
 }

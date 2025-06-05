@@ -1,5 +1,6 @@
 package com.synergyx.trading.model;
 
+import com.synergyx.trading.model.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,11 +13,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StockOhlcv {
+public class StockOhlcv extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stock_id", nullable = false)
@@ -26,20 +27,17 @@ public class StockOhlcv {
     private LocalDateTime timestamp;
 
     @Column(nullable = false)
-    private Float open;
+    private Double open;
 
     @Column(nullable = false)
-    private Float high;
+    private Double high;
 
     @Column(nullable = false)
-    private Float low;
+    private Double low;
 
     @Column(nullable = false)
-    private Float close;
+    private Double close;
 
     @Column(nullable = false)
-    private Integer volume;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private Long volume;
 }

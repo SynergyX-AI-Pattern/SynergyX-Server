@@ -4,6 +4,7 @@ import com.synergyx.trading.model.Stock;
 import com.synergyx.trading.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

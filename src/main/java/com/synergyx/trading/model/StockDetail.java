@@ -26,6 +26,9 @@ public class StockDetail extends BaseEntity {
     @Column(nullable = false)
     private Double price;
 
+    @Column(name = "change_rate", nullable = false)
+    private Double changeRate;
+
     @Column(name = "financial_data", columnDefinition = "json", nullable = false)
     private String financialData;
 }

@@ -16,6 +16,6 @@ public class KisStockScheduler {
     // 1분마다 실행 (초 분 시)
     @Scheduled(cron = "0 */1 * * * *")
     public void fetchKospi100Stocks() {
-        kisService.fetchAndSaveKospi100();  // 매 1분마다 KOSPI100 현재가 수집
+//        kisService.fetchAndSaveKospi100();  // 매 n분마다 KOSPI100 현재가 수집
     }
 }

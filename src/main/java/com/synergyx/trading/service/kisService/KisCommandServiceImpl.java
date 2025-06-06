@@ -1,70 +1,95 @@
 package com.synergyx.trading.service.kisService;
 
-import com.synergyx.trading.client.KisClient;
-import com.synergyx.trading.dto.kis.KisStockDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.synergyx.trading.config.KisProperties;
 import com.synergyx.trading.model.Stock;
 import com.synergyx.trading.model.StockDetail;
-import com.synergyx.trading.model.StockOhlcv;
 import com.synergyx.trading.repository.StockDetailRepository;
 import com.synergyx.trading.repository.StockOhlcvRepository;
 import com.synergyx.trading.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class KisCommandServiceImpl implements KisCommandService {
-    private final KisClient kisClient;
+    private final WebClient kisWebClient;
+    private final KisProperties kisProperties;
     private final StockRepository stockRepository;
     private final StockDetailRepository stockDetailRepository;
     private final StockOhlcvRepository stockOhlcvRepository;
+    private final ObjectMapper objectMapper;
+    private final KisTokenService tokenService;
 
+    /**
+     * KIS 로부터 시가총액, 현재가, 등락율, per, pbr 를 가져와 업데이트합니다. 
+     */
     @Transactional
-    public void fetchAndSaveKospi100() {
-        /**
-        List<KisStockDTO> stockDtos = kisClient.getKospi100Stocks();
+    @Override
+    public void updateStockDetailsFromKis() {
+        List<Stock> stocks = stockRepository.findAll();
 
-        for (KisStockDTO dto : stockDtos) {
-            // 종목 저장 (upsert)
-            Stock stock = stockRepository.findBySymbol(dto.getSymbol())
-                    .orElseGet(() -> Stock.builder()
-                            .symbol(dto.getSymbol())
-                            .name(dto.getName())
-                            .imageUrl("default.jpg")
-                            .build());
-            stockRepository.save(stock);
+        for (Stock stock : stocks) {
+            try {
+                String accessToken = tokenService.getAccessToken();
 
-            // 현재가 저장 (update or insert)
-            StockDetail detail = StockDetail.builder()
-                    .stockId(stock.getId())
-                    .stock(stock)
-                    .price(dto.getPrice())
-                    .financialData("{}") // 재무 데이터 미처리
-                    .createdAt(LocalDateTime.now())
-                    .updatedAt(LocalDateTime.now())
-                    .build();
-            stockDetailRepository.save(detail);
+                String response = kisWebClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path("/uapi/domestic-stock/v1/quotations/inquire-price")
+                                .queryParam("fid_cond_mrkt_div_code", "J")
+                                .queryParam("fid_input_iscd", stock.getSymbol())
+                                .build())
+                        .header("authorization", "Bearer " + accessToken)
+                        .header("appkey", kisProperties.getAppKey())
+                        .header("appsecret", kisProperties.getAppSecret())
+                        .header("tr_id", "FHKST01010100")
+                        .header("custtype", "P")
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block();
 
-            // OHLCV 저장
-            boolean exists = stockOhlcvRepository.existsByStockIdAndTimestamp(stock.getId(), dto.getTimestamp());
-            if (!exists) {
-                StockOhlcv ohlcv = StockOhlcv.builder()
+                ObjectNode jsonNode = (ObjectNode) objectMapper.readTree(response).get("output");
+
+                Double price = parseDouble(jsonNode.get("stck_prpr").asText());
+                Double changeRate = parseDouble(jsonNode.get("prdy_ctrt").asText());
+
+                // financial data 생성
+                ObjectNode financialDataNode = objectMapper.createObjectNode();
+                financialDataNode.put("market_cap", jsonNode.get("hts_avls").asText());
+                financialDataNode.put("dividend_yield", ""); // 배당수익률은 아직 없음
+                financialDataNode.put("roe", ""); // roe도 나중에 채울 수 있음
+                financialDataNode.put("per", jsonNode.get("per").asText());
+                financialDataNode.put("pbr", jsonNode.get("pbr").asText());
+                financialDataNode.put("psr", ""); // psr은 다른 api에서 제공
+
+                StockDetail stockDetail = StockDetail.builder()
                         .stock(stock)
-                        .timestamp(dto.getTimestamp())
-                        .open(dto.getOpen())
-                        .high(dto.getHigh())
-                        .low(dto.getLow())
-                        .close(dto.getClose())
-                        .volume(dto.getVolume())
-                        .createdAt(LocalDateTime.now())
+                        .price(price)
+                        .changeRate(changeRate)
+                        .financialData(financialDataNode.toString())
                         .build();
-                stockOhlcvRepository.save(ohlcv);
+
+                stockDetailRepository.save(stockDetail);
+                Thread.sleep(100); // api 호출 제한으로 대기
+
+            } catch (Exception e) {
+                log.error("[KIS] Failed to fetch/update stock detail for {}: {}", stock.getSymbol(), e.getMessage(), e);
             }
         }
-         */
+    }
+
+    private Double parseDouble(String value) {
+        try {
+            return Double.parseDouble(value);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

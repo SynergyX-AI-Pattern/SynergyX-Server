@@ -15,20 +15,23 @@ import java.time.LocalDateTime;
 public class StockDetail extends BaseEntity {
 
     @Id
-    @Column(name = "stock_id")
-    private Long stockId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @MapsId
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stock_id")
+    @JoinColumn(name = "stock_id", nullable = false, unique = true)
     private Stock stock;
 
-    @Column(nullable = false)
+    @Column
     private Double price;
 
-    @Column(name = "change_rate", nullable = false)
+    @Column(name = "change_rate")
     private Double changeRate;
 
-    @Column(name = "financial_data", columnDefinition = "json", nullable = false)
+    @Column(name = "financial_data", columnDefinition = "json")
     private String financialData;
+
+    @Version
+    @Column(name = "version")
+    private Long version; // 동시성 제어를 위해 추가
 }

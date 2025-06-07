@@ -17,6 +17,8 @@ import com.synergyx.trading.service.kisService.client.KisApiClient;
 import java.util.List;
 import java.util.Map;
 
+import static com.synergyx.trading.util.ParsingUtil.toDouble;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -26,7 +28,6 @@ public class KisPriceUpdateService {
     private final StockRepository stockRepository;
     private final StockDetailRepository stockDetailRepository;
     private final ObjectMapper objectMapper;
-    private final KisTokenService tokenService;
 
     /**
      * 시가총액/현재가/등락률 + PER/PBR 을 업데이트합니다.
@@ -76,6 +77,12 @@ public class KisPriceUpdateService {
         }
     }
 
+    /**
+     * 실제 요청을 수행합니다.
+     *
+     * @param symbol
+     * @return KIS 시세 API 응답의 output 노드
+     */
     private ObjectNode fetchPriceJson(String symbol) {
         JsonNode response = kisApiClient.get(
                 "/uapi/domestic-stock/v1/quotations/inquire-price",
@@ -89,9 +96,18 @@ public class KisPriceUpdateService {
         return (ObjectNode) response.get("output");
     }
 
+    /**
+     * Stock Detail 을 생성 또는 업데이트합니다.
+     * per, pbr 값이 기존과 다를 때만 변경합니다.
+     *
+     * @param stock    시세 정보가 연결될 종목 엔티티
+     * @param jsonNode KIS 시세 API 응답의 output 노드
+     * @return 생성 또는 업데이트된 stockDetail 객체
+     * @throws JsonProcessingException
+     */
     private StockDetail createOrUpdateStockDetail(Stock stock, ObjectNode jsonNode) throws JsonProcessingException {
-        Double price = parseDouble(jsonNode.get("stck_prpr").asText());
-        Double changeRate = parseDouble(jsonNode.get("prdy_ctrt").asText());
+        Double price = toDouble(jsonNode.get("stck_prpr").asText());
+        Double changeRate = toDouble(jsonNode.get("prdy_ctrt").asText());
 
         StockDetail stockDetail = stockDetailRepository.findById(stock.getId())
                 .orElse(StockDetail.builder().stock(stock).build());
@@ -117,13 +133,5 @@ public class KisPriceUpdateService {
         stockDetail.setFinancialData(financialDataNode.toString());
 
         return stockDetail;
-    }
-
-    private Double parseDouble(String value) {
-        try {
-            return Double.parseDouble(value);
-        } catch (Exception e) {
-            return null;
-        }
     }
 }

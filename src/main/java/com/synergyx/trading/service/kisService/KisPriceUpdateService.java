@@ -1,9 +1,9 @@
 package com.synergyx.trading.service.kisService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.synergyx.trading.config.KisProperties;
 import com.synergyx.trading.model.Stock;
 import com.synergyx.trading.model.StockDetail;
 import com.synergyx.trading.repository.StockDetailRepository;
@@ -12,17 +12,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
+import com.synergyx.trading.service.kisService.client.KisApiClient;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class KisStockDetailService {
+public class KisPriceUpdateService {
 
-    private final WebClient kisWebClient;
-    private final KisProperties kisProperties;
+    private final KisApiClient kisApiClient;
     private final StockRepository stockRepository;
     private final StockDetailRepository stockDetailRepository;
     private final ObjectMapper objectMapper;
@@ -37,11 +37,10 @@ public class KisStockDetailService {
 
         for (Stock stock : stocks) {
             try {
-                String accessToken = tokenService.getAccessToken();
-                ObjectNode jsonNode = fetchPriceJson(stock.getSymbol(), accessToken);
+                ObjectNode jsonNode = fetchPriceJson(stock.getSymbol());
 
                 StockDetail detail = createOrUpdateStockDetail(stock, jsonNode);
-                boolean isNew = (detail.getUpdatedAt() == null); // 예시 조건
+                boolean isNew = (detail.getUpdatedAt() == null);
 
                 stockDetailRepository.save(detail);
                 log.info("[KIS] {} 종목 {}됨", stock.getSymbol(), isNew ? "신규 등록" : "업데이트");
@@ -64,8 +63,7 @@ public class KisStockDetailService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 종목코드의 Stock이 존재하지 않음: " + symbol));
 
         try {
-            String accessToken = tokenService.getAccessToken();
-            ObjectNode jsonNode = fetchPriceJson(symbol, accessToken);
+            ObjectNode jsonNode = fetchPriceJson(symbol);
 
             StockDetail detail = createOrUpdateStockDetail(stock, jsonNode);
             boolean isNew = (detail.getUpdatedAt() == null); // 또는 직접 DB에서 존재 여부 체크해도 됨
@@ -78,25 +76,17 @@ public class KisStockDetailService {
         }
     }
 
-    private ObjectNode fetchPriceJson(String symbol, String token) throws JsonProcessingException {
-        String response = kisWebClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/uapi/domestic-stock/v1/quotations/inquire-price")
-                        .queryParam("fid_cond_mrkt_div_code", "J")
-                        .queryParam("fid_input_iscd", symbol)
-                        .build())
-                .headers(headers -> {
-                    headers.setBearerAuth(token);
-                    headers.set("appkey", kisProperties.getAppKey());
-                    headers.set("appsecret", kisProperties.getAppSecret());
-                    headers.set("tr_id", "FHKST01010100");
-                    headers.set("custtype", "P");
-                })
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+    private ObjectNode fetchPriceJson(String symbol) {
+        JsonNode response = kisApiClient.get(
+                "/uapi/domestic-stock/v1/quotations/inquire-price",
+                Map.of(
+                        "fid_cond_mrkt_div_code", "J",
+                        "fid_input_iscd", symbol
+                ),
+                "FHKST01010100"
+        );
 
-        return (ObjectNode) objectMapper.readTree(response).get("output");
+        return (ObjectNode) response.get("output");
     }
 
     private StockDetail createOrUpdateStockDetail(Stock stock, ObjectNode jsonNode) throws JsonProcessingException {

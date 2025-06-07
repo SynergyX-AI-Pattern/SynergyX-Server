@@ -1,6 +1,5 @@
 package com.synergyx.trading.scheduler;
 
-import com.synergyx.trading.service.kisService.KisCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -10,8 +9,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class KisStockScheduler {
-
-    private final KisCommandService kisService;
 
     // 1분마다 실행 (초 분 시)
     @Scheduled(cron = "0 */1 * * * *")

@@ -1,8 +1,8 @@
 package com.synergyx.trading.controller;
 
 import com.synergyx.trading.apiPayload.ApiResponse;
-import com.synergyx.trading.service.kisService.KisRoeService;
-import com.synergyx.trading.service.kisService.KisStockDetailService;
+import com.synergyx.trading.service.kisService.KisRoeUpdateService;
+import com.synergyx.trading.service.kisService.KisPriceUpdateService;
 import com.synergyx.trading.service.kisService.KisTokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.*;
 public class KisTestController {
 
     private final KisTokenService kisTokenService;
-    private final KisRoeService kisRoeService;
-    private final KisStockDetailService kisStockDetailService;
+    private final KisRoeUpdateService kisRoeService;
+    private final KisPriceUpdateService kisStockDetailService;
 
     @Operation(summary = "KIS Access Token API", description = "KIS의 Access Token 을 발급 또는 로드합니다.")
     @GetMapping("/token")

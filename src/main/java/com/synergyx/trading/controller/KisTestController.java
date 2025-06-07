@@ -6,6 +6,7 @@ import com.synergyx.trading.service.kisService.KisRoeUpdateService;
 import com.synergyx.trading.service.kisService.KisPriceUpdateService;
 import com.synergyx.trading.service.kisService.KisTokenService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,11 +28,11 @@ public class KisTestController {
     @GetMapping("/token")
     public ResponseEntity<String> getAccessTokenForTest() {
         String accessToken = kisTokenService.getAccessToken();
-        return ResponseEntity.ok("✅ 발급된 AccessToken: " + accessToken);
+        return ResponseEntity.ok("발급된 AccessToken: " + accessToken);
     }
 
     @Operation(summary = "전체 Stock Detail 업데이트 API", description = "시가총액, 현재가, 등락률, per, pbr 을 가져옵니다.")
-    @PostMapping("/update-stock_detail")
+    @PostMapping("/stocks/details")
     public ResponseEntity<?> updateStockDetails() {
         try {
             kisStockDetailService.updateStockDetailsFromKis();
@@ -44,10 +45,12 @@ public class KisTestController {
     }
 
     @Operation(summary = "개별 종목 Stock Detail 업데이트 API", description = "시가총액, 현재가, 등락률, per, pbr 을 가져옵니다.")
-    @PostMapping("/update-specific-stock_detail")
-    public ResponseEntity<?> updateStockDetailsBySymbol(@RequestParam String stockCode) {
+    @PostMapping("/stocks/{symbol}/details")
+    public ResponseEntity<?> updateStockDetailsBySymbol(
+            @Parameter(description = "종목 코드", required = true)
+            @PathVariable String symbol) {
         try {
-            kisStockDetailService.updateStockDetailBySymbol(stockCode);
+            kisStockDetailService.updateStockDetailBySymbol(symbol);
             return ResponseEntity.ok(ApiResponse.onSuccess("STOCK_UPDATE_SUCCESS", "주식 디테일 저장 완료"));
         } catch (Exception e) {
             return ResponseEntity
@@ -57,7 +60,7 @@ public class KisTestController {
     }
 
     @Operation(summary = "전체 ROE 업데이트 API", description = "ROE 값을 가져옵니다.")
-    @PostMapping("/update-roe")
+    @PostMapping("/stocks/roe")
     public ResponseEntity<?> updateRoe() {
         try {
             kisRoeService.updateRoeFromKis();
@@ -70,10 +73,12 @@ public class KisTestController {
     }
 
     @Operation(summary = "개별 종목 ROE 업데이트 API", description = "개별 종목의 ROE 값을 가져옵니다.")
-    @PostMapping("/update-specific-roe")
-    public ResponseEntity<?> updateRoeBySymbol(@RequestParam String stockCode) {
+    @PostMapping("/stocks/{symbol}/roe")
+    public ResponseEntity<?> updateRoeBySymbol(
+            @Parameter(description = "종목 코드", required = true)
+            @PathVariable String symbol) {
         try {
-            kisRoeService.updateRoeBySymbol(stockCode);
+            kisRoeService.updateRoeBySymbol(symbol);
             return ResponseEntity.ok(ApiResponse.onSuccess("STOCK_UPDATE_SUCCESS", "ROE 저장 완료"));
         } catch (Exception e) {
             return ResponseEntity
@@ -83,7 +88,7 @@ public class KisTestController {
     }
 
     @Operation(summary = "전체 PSR 업데이트 API", description = "PSR 값을 가져옵니다.")
-    @PostMapping("/update-psr")
+    @PostMapping("/stocks/psr")
     public ResponseEntity<?> updatePsr() {
         try {
             kisPsrUpdateService.updatePsr();
@@ -96,10 +101,12 @@ public class KisTestController {
     }
 
     @Operation(summary = "개별 종목 PSR 업데이트 API", description = "개별 종목의 PSR 값을 가져옵니다.")
-    @PostMapping("/update-specific-psr")
-    public ResponseEntity<?> updatePsrBySymbol(@RequestParam String stockCode) {
+    @PostMapping("/stocks/{symbol}/psr")
+    public ResponseEntity<?> updatePsrBySymbol(
+            @Parameter(description = "종목 코드", required = true)
+            @PathVariable String symbol) {
         try {
-            kisPsrUpdateService.updatePsrBySymbol(stockCode);
+            kisPsrUpdateService.updatePsrBySymbol(symbol);
             return ResponseEntity.ok(ApiResponse.onSuccess("STOCK_UPDATE_SUCCESS", "PSR 저장 완료"));
         } catch (Exception e) {
             return ResponseEntity

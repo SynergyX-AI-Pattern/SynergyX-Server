@@ -36,11 +36,11 @@ public class KisTokenServiceImpl implements KisTokenService {
         KisToken token = kisTokenRepository.findTopByOrderByUpdatedAtDesc();
 
         if (token != null && !isExpired(token)) {
-            log.info("✅ [KIS] DB에 저장된 유효한 AccessToken 사용");
+            log.info("[KIS] DB에 저장된 유효한 AccessToken 사용");
             return token.getAccessToken();
         }
 
-        log.info("🔄 [KIS] 토큰이 없거나 만료됨 → 새로 발급 요청");
+        log.info("[KIS] 토큰이 없거나 만료됨 → 새로 발급 요청");
         KisToken newToken = refreshAccessToken();
         return newToken.getAccessToken();
     }

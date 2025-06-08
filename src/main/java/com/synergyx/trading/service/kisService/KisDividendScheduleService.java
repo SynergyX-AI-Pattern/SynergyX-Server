@@ -70,8 +70,7 @@ public class KisDividendScheduleService {
     private void updateDividendYieldInternal(Stock stock) throws Exception {
         ObjectNode response = fetchDividendSchedule(stock.getSymbol());
 
-        log.info("[PSR] 응답 전체 JSON ({}):\n{}", stock.getSymbol(),
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+//        log.info("[PSR] 응답 전체 JSON ({}):\n{}", stock.getSymbol(), objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
 
         JsonNode output = response.get("output1");
         if (output == null || !output.isArray()) {

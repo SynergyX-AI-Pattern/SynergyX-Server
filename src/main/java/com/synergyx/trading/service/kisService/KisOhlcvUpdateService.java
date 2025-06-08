@@ -71,8 +71,7 @@ public class KisOhlcvUpdateService {
     private void updateOhlcvInternal(Stock stock) {
         JsonNode candles = fetchOhlcvCandles(stock.getSymbol());
 
-        log.info("[OHLCV] 응답 전체 JSON ({}):\n{}", stock.getSymbol(),
-                candles.toPrettyString());
+//        log.info("[OHLCV] 응답 전체 JSON ({}):\n{}", stock.getSymbol(), candles.toPrettyString());
 
         if (!candles.isArray()) {
             log.warn("[OHLCV] 응답 포맷 오류 - symbol: {}", stock.getSymbol());

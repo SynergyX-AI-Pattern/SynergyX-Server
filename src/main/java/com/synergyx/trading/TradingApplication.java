@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableJpaAuditing
 @SpringBootApplication
-//@EnableScheduling
+@EnableScheduling
 public class TradingApplication {
 
 	public static void main(String[] args) {

@@ -18,4 +18,18 @@ public class ParsingUtil {
             return null;
         }
     }
+
+    /**
+     * 문자열을 Long 으로 파싱합니다.
+     *
+     * @param value 문자열
+     * @return 변환된 Long 또는 null
+     */
+    public static Long toLong(String value) {
+        try {
+            return Long.parseLong(value);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

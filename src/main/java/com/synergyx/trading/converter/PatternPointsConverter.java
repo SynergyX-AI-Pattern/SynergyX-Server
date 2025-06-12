@@ -1,4 +1,4 @@
-package com.synergyx.trading.conveter;
+package com.synergyx.trading.converter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

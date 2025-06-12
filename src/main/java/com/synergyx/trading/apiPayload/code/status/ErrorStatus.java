@@ -18,6 +18,24 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 사용자 관련 예외 처리
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER404", "해당 ID를 가진 사용자를 찾을 수 없습니다."),
+
+    // 관심종목 관련 예외 처리
+    ALREADY_REGISTERED_INTEREST(HttpStatus.BAD_REQUEST, "INTEREST4001", "이미 관심 종목에 등록되어 있습니다."),
+    INTEREST_NOT_FOUND(HttpStatus.NOT_FOUND, "INTEREST404", "관심 종목이 존재하지 않습니다."),
+
+    // 종목 관련 예외 처리
+    STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "STOCK404", "해당 종목을 찾을 수 없습니다."),
+
+    // 패턴 관련 예외 처리
+    PATTERN_NOT_FOUND(HttpStatus.NOT_FOUND, "PATTERN404", "패턴이 존재하지 않습니다."),
+
+    // 패턴 적용 관련 예외 처리
+    PATTERN_APPLY_NOT_FOUND(HttpStatus.NOT_FOUND, "PATTERN_APPLY404", "해당 패턴 적용 정보가 존재하지 않습니다."),
+
+    // 백테스팅 관련 예외 처리
+    BACKTEST_NOT_FOUND(HttpStatus.NOT_FOUND, "BACKTEST404", "해당 백테스트 결과가 존재하지 않습니다."),
+    BACKTEST_PERIOD_EXCEEDS_LIMIT(HttpStatus.BAD_REQUEST, "BACKTEST400", "백테스트 기간은 최대 5년까지 가능합니다."),
+
     ;
 
     private final HttpStatus httpStatus;

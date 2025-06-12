@@ -17,7 +17,19 @@ public enum SuccessStatus implements BaseCode {
 
     // 관심종목
     SUCCESS_WATCHLIST_REMOVE(HttpStatus.OK, "WATCHLIST200", "관심 종목에서 삭제되었습니다."),
-    SUCCESS_WATCHLIST_ADD(HttpStatus.OK, "WATCHLIST200", "관심 종목에 등록되었습니다.")
+    SUCCESS_WATCHLIST_ADD(HttpStatus.OK, "WATCHLIST200", "관심 종목에 등록되었습니다."),
+
+    // 패턴
+    SUCCESS_PATTERN_CREATE(HttpStatus.OK, "PATTERN200", "패턴이 생성되었습니다."),
+    SUCCESS_PATTERN_DELETE(HttpStatus.OK, "PATTERN200", "패턴이 삭제되었습니다."),
+    SUCCESS_PATTERN_UPDATE(HttpStatus.OK, "PATTERN200", "패턴이 수정되었습니다."),
+    SUCCESS_PATTERN_APPLY(HttpStatus.OK, "PATTERN200", "패턴이 적용되었습니다."),
+    SUCCESS_PATTERN_NOTIFICATION_TOGGLE(HttpStatus.OK, "PATTERN200", "패턴 알림 설정이 변경되었습니다."),
+
+    // 백테스팅
+    SUCCESS_BACKTEST_EXECUTE(HttpStatus.OK, "BACKTEST200", "백테스트가 실행되었습니다."),
+
+
     ;
 
     private final HttpStatus httpStatus;

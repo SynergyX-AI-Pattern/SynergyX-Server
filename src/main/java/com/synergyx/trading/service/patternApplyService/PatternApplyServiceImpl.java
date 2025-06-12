@@ -1,15 +1,20 @@
 package com.synergyx.trading.service.patternApplyService;
 
+import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
+import com.synergyx.trading.apiPayload.exception.GeneralException;
 import com.synergyx.trading.dto.patternApply.PatternApplyRequestDTO;
 import com.synergyx.trading.dto.patternApply.PatternApplyResponseDTO;
-import com.synergyx.trading.model.PatternApplyEntity;
-import com.synergyx.trading.model.PatternEntity;
+import com.synergyx.trading.model.Pattern;
+import com.synergyx.trading.model.PatternApply;
+import com.synergyx.trading.model.Stock;
+import com.synergyx.trading.model.User;
 import com.synergyx.trading.repository.PatternApplyRepository;
 import com.synergyx.trading.repository.PatternRepository;
+import com.synergyx.trading.repository.StockRepository;
+import com.synergyx.trading.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.NoSuchElementException;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,21 +22,34 @@ public class PatternApplyServiceImpl implements PatternApplyService {
 
     private final PatternRepository patternRepository;
     private final PatternApplyRepository patternApplyRepository;
+    private final UserRepository userRepository;
+    private final StockRepository stockRepository;
 
     // 패턴 적용
     @Override
-    public PatternApplyResponseDTO.PatternApplyResultDTO applyPattern(PatternApplyRequestDTO.PatternApplyDTO request) {
-        PatternEntity pattern = patternRepository.findById(request.getPatternId())
-                .orElseThrow(() -> new NoSuchElementException("패턴이 존재하지 않습니다."));
+    @Transactional
+    public PatternApplyResponseDTO.PatternApplyResultDTO applyPattern(Long userId, PatternApplyRequestDTO.PatternApplyDTO request) {
 
-        PatternApplyEntity apply = PatternApplyEntity.builder()
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        // 패턴 조회
+        Pattern pattern = patternRepository.findById(request.getPatternId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_NOT_FOUND));
+
+        // 종목 조회
+        Stock stock = stockRepository.findById(request.getStockId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus.STOCK_NOT_FOUND));
+
+        PatternApply apply = PatternApply.builder()
                 .pattern(pattern)
-//                .stockId(request.getStockId())
-                .stockId("20") // 종목 엔티티 생성 전 하드코딩
+                .stock(stock)
+                .user(user)
                 .isAlertEnabled(false)
                 .build();
 
-        PatternApplyEntity saved = patternApplyRepository.save(apply);
+        PatternApply saved = patternApplyRepository.save(apply);
 
         return PatternApplyResponseDTO.PatternApplyResultDTO.builder()
                 .patternApplyId(saved.getId())
@@ -41,12 +59,19 @@ public class PatternApplyServiceImpl implements PatternApplyService {
 
     // 패턴 알림 토글
     @Override
-    public PatternApplyResponseDTO.PatternApplyResultDTO toggleNotification(Long patternApplyId) {
-        PatternApplyEntity entity = patternApplyRepository.findById(patternApplyId)
-                .orElseThrow(() -> new NoSuchElementException("해당 패턴 적용 정보가 존재하지 않습니다."));
+    @Transactional
+    public PatternApplyResponseDTO.PatternApplyResultDTO toggleNotification(Long userId, Long patternApplyId) {
 
-        entity.setIsAlertEnabled(!entity.getIsAlertEnabled());
-        PatternApplyEntity updated = patternApplyRepository.save(entity);
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        // 패턴 적용 정보 조회
+        PatternApply patternApply = patternApplyRepository.findById(patternApplyId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_APPLY_NOT_FOUND));
+
+        patternApply.setIsAlertEnabled(!patternApply.getIsAlertEnabled());
+        PatternApply updated = patternApplyRepository.save(patternApply);
 
         return PatternApplyResponseDTO.PatternApplyResultDTO.builder()
                 .patternApplyId(updated.getId())

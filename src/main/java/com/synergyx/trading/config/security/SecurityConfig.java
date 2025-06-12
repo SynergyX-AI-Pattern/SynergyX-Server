@@ -17,6 +17,7 @@ public class SecurityConfig {
     private static final String[] AUTH_WHITELIST = {
             "/auth/signup",
             "/auth/login",
+            "/**"
     };
 
     private static final String[] SWAGGER_WHITELIST = {

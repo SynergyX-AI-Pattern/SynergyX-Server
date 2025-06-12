@@ -13,6 +13,7 @@ public class BacktestResponseDTO  {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BacktestExecutionDTO {
+        private Long backtestId; // 백테스트 ID
         private String stockName; // 종목명
         private LocalDate executedAt; // 백테스트 실행 날짜
         private Integer matchedCount; // 패턴 매칭 횟수
@@ -34,6 +35,7 @@ public class BacktestResponseDTO  {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class BacktestResultDetailDTO {
+        private Long backtestId; // 백테스트 ID
         private String stockName; // 종목명
         private String stockImage; // 종목 이미지
         private LocalDate executedAt; // 백테스트 실행 날짜

@@ -2,11 +2,16 @@ package com.synergyx.trading.controller;
 
 import com.synergyx.trading.dto.pattern.PatternRequestDTO;
 import com.synergyx.trading.dto.pattern.PatternResponseDTO;
-import com.synergyx.trading.service.patternService.PatternService;
+import com.synergyx.trading.service.patternService.PatternCommandService;
+import com.synergyx.trading.service.patternService.PatternQueryService;
 import com.synergyx.trading.apiPayload.code.status.SuccessStatus;
 import com.synergyx.trading.apiPayload.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,51 +19,71 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/patterns")
+@Tag(name = "패턴 API", description = "패턴 관련 API 입니다.")
 public class PatternController {
 
-    private final PatternService patternService;
+    // 임시 userId
+    private static final Long TEMP_USER_ID = 1L;
 
-    // 패턴 등록 (임시 유저 아이디)
+    private final PatternCommandService patternCommandService;
+    private final PatternQueryService patternQueryService;
+
+    // 패턴 생성
+    @Operation(summary = "패턴 생성", description = "사용자의 종목 패턴을 생성합니다.")
     @PostMapping
-    public ApiResponse<PatternResponseDTO.PatternDTO> createPattern(
-            @RequestBody @Valid PatternRequestDTO dto) {
-        String userId = "SoominCho";  // 임시 유저 아이디 (나중에 사용자 인증 대체 예정)
-        PatternResponseDTO.PatternDTO createdPattern = patternService.createPattern(userId, dto);
-        return ApiResponse.of(SuccessStatus._OK, createdPattern);
+    public ResponseEntity<?> createPattern(@RequestBody @Valid PatternRequestDTO dto) {
+        PatternResponseDTO.PatternDTO createdPattern = patternCommandService.createPattern(TEMP_USER_ID, dto);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+                createdPattern,
+                SuccessStatus.SUCCESS_PATTERN_CREATE.getCode(),
+                SuccessStatus.SUCCESS_PATTERN_CREATE.getMessage()
+        ));
     }
 
-    // 패턴 목록 조회 (임시 유저 아이디)
+    // 패턴 목록 조회
+    @Operation(summary = "패턴 목록 조회", description = "사용자의 종목 패턴 목록을 조회합니다.")
     @GetMapping
-    public ApiResponse<List<PatternResponseDTO.PatternDTO>> getPatternList() {
-        String userId = "SoominCho"; // 임시 유저 아이디 (나중에 사용자 인증 대체 예정)
-        List<PatternResponseDTO.PatternDTO> list = patternService.getPatternList(userId);
-        return ApiResponse.of(SuccessStatus._OK, list);
+    public ResponseEntity<?> getPatternList() {
+    List<PatternResponseDTO.PatternDTO> list = patternQueryService.getPatternList(TEMP_USER_ID);
+    return ResponseEntity.ok(ApiResponse.onSuccess(list));
     }
 
-    // 패턴 상세 조회 (임시 유저 아이디)
+    // 패턴 상세 조회
+    @Operation(summary = "패턴 상세 조회", description = "선택한 패턴의 상세 정보를 조회합니다.")
     @GetMapping("/{patternId}")
-    public ApiResponse<PatternResponseDTO.PatternDetailDTO> getPatternDetail(@PathVariable Long patternId) {
-        String userId = "SoominCho"; // JWT 적용 전까지 고정
-        PatternResponseDTO.PatternDetailDTO dto = patternService.getPatternDetail(patternId, userId);
-        return ApiResponse.of(SuccessStatus._OK, dto);
+    public ResponseEntity<?> getPatternDetail(
+            @Parameter
+            @PathVariable Long patternId) {
+        PatternResponseDTO.PatternDetailDTO dto = patternQueryService.getPatternDetail(TEMP_USER_ID, patternId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(dto));
     }
 
-    // 패턴 수정 (임시 유저 아이디)
+
+    // 패턴 수정
+    @Operation(summary = "패턴 수정", description = "사용자의 종목 패턴을 수정합니다.")
     @PatchMapping("/{patternId}")
-    public ApiResponse<Void> updatePattern(@PathVariable Long patternId,
-                                           @RequestBody PatternRequestDTO dto) {
-        String userId = "SoominCho";
-        patternService.updatePattern(patternId, userId, dto);
-        return ApiResponse.of(SuccessStatus._OK, null);
+    public ResponseEntity<?> updatePattern(
+            @PathVariable Long patternId,
+            @RequestBody PatternRequestDTO dto) {
+        patternCommandService.updatePattern(TEMP_USER_ID, patternId, dto);
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+                SuccessStatus.SUCCESS_PATTERN_UPDATE.getCode(),
+                SuccessStatus.SUCCESS_PATTERN_UPDATE.getMessage()
+        ));
     }
 
-    // 패턴 삭제 (임시 유저 아이디)
+    // 패턴 삭제
+    @Operation(summary = "패턴 삭제", description = "사용자의 종목 패턴을 삭제합니다.")
     @DeleteMapping("/{patternId}")
-    public ApiResponse<Void> deletePattern(@PathVariable Long patternId) {
-        String userId = "SoominCho";
-        patternService.deletePattern(patternId, userId);
-        return ApiResponse.of(SuccessStatus._OK, null);
+    public ResponseEntity<?> deletePattern(
+            @Parameter
+            @PathVariable Long patternId) {
+        patternCommandService.deletePattern(TEMP_USER_ID, patternId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+                SuccessStatus.SUCCESS_PATTERN_DELETE.getCode(),
+                SuccessStatus.SUCCESS_PATTERN_DELETE.getMessage()
+        ));
     }
-
 }
 

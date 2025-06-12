@@ -1,129 +1,168 @@
 package com.synergyx.trading.service.backtestService;
+import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
+import com.synergyx.trading.apiPayload.exception.GeneralException;
 import com.synergyx.trading.dto.backtest.BacktestRequestDTO;
 import com.synergyx.trading.dto.backtest.BacktestResponseDTO;
-import com.synergyx.trading.model.BacktestEntity;
-import com.synergyx.trading.model.PatternEntity;
+import com.synergyx.trading.model.Backtest;
+import com.synergyx.trading.model.Pattern;
+import com.synergyx.trading.model.Stock;
+import com.synergyx.trading.model.User;
 import com.synergyx.trading.repository.BacktestRepository;
 import com.synergyx.trading.repository.PatternRepository;
+import com.synergyx.trading.repository.StockRepository;
+import com.synergyx.trading.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.NoSuchElementException;
+
+import static com.synergyx.trading.model.QBacktest.backtest;
 
 @Service
 @RequiredArgsConstructor
 public class BacktestServiceImpl implements BacktestService {
     private final PatternRepository patternRepository;
     private final BacktestRepository backtestRepository;
+    private final StockRepository stockRepository;
+    private final UserRepository userRepository;
 
     // 백테스팅 실행
     @Override
-    public BacktestResponseDTO.BacktestExecutionDTO runBacktest(Long patternId, Long stockId, BacktestRequestDTO request) {
-        PatternEntity pattern = patternRepository.findById(patternId)
-                .orElseThrow(() -> new IllegalArgumentException("패턴이 존재하지 않습니다."));
-        // 종목 엔티티 구현 전 -> 구현 후 캡션 제거
-//        StockEntity stock = stockRepository.findById(stockId)
-//                .orElseThrow(() -> new IllegalArgumentException("종목이 존재하지 않습니다."));
+    @Transactional
+    public BacktestResponseDTO.BacktestExecutionDTO runBacktest(Long userId, Long patternId, Long stockId, BacktestRequestDTO request) {
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        // 패턴 조회
+        Pattern pattern = patternRepository.findById(patternId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_NOT_FOUND));
+
+        // 종목 조회
+        Stock stock = stockRepository.findById(stockId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.STOCK_NOT_FOUND));
 
         LocalDate startDate = request.getStartDate();
         LocalDate endDate = request.getEndDate();
 
         // 백테스팅 기간 최대 5년 제한
         if (startDate.isAfter(endDate) || startDate.plusYears(5).isBefore(endDate)) {
-            throw new IllegalArgumentException("실행 기간은 최대 5년 입니다.");
-        }
+            throw new GeneralException(ErrorStatus.BACKTEST_PERIOD_EXCEEDS_LIMIT);
 
-        // 백테스트 분석 로직 호출
-        // fastAPI 연결 후 수정.
-        // 분석 결과 (목데이터)
-        BacktestResponseDTO.BacktestExecutionDTO resultDto = BacktestResponseDTO.BacktestExecutionDTO.builder()
-                .stockName("카카오")  // 임시 종목명 -> 실제 연동 시 stockId로 조회 예정
-                .executedAt(LocalDate.now())
-                .startDate(startDate)
-                .endDate(endDate)
-                .winRate(65.2)
-                .averageReturn(12.5)
-                .matchedCount(8)
-                .maxReturnDate(LocalDate.of(2024, 3, 15))
-                .maxReturn(25.4)
-                .minReturnDate(LocalDate.of(2024, 2, 10))
-                .minReturn(-7.8)
-                .lastMatchedDate(LocalDate.of(2024, 4, 20))
-                .lastMatchedReturn(9.3)
-                .totalReturn(88.3)
-                .build();
+        }
 
         // fastAPI 연결 후 수정.
         // 분석 결과를 DB에 저장
-        BacktestEntity entity = BacktestEntity.builder()
+        // 백테스트 분석 결과 (목데이터)
+        LocalDate executedAt = LocalDate.now();
+        double winRate = 65.2;
+        double averageReturn = 12.5;
+        int matchedCount = 8;
+        LocalDate maxReturnDate = LocalDate.of(2024, 3, 15);
+        double maxReturn = 25.4;
+        LocalDate minReturnDate = LocalDate.of(2024, 2, 10);
+        double minReturn = -7.8;
+        LocalDate lastMatchedDate = LocalDate.of(2024, 4, 20);
+        double lastMatchedReturn = 9.3;
+        double totalReturn = 88.3;
+
+        // DB 저장용 엔티티 생성
+        Backtest backtest = Backtest.builder()
+                .user(user)
                 .pattern(pattern)
-                .stockId(stockId)
-                .executedAt(resultDto.getExecutedAt())
-                .startDate(resultDto.getStartDate())
-                .endDate(resultDto.getEndDate())
-                .winRate(resultDto.getWinRate())
-                .averageReturn(resultDto.getAverageReturn())
-                .matchedCount(resultDto.getMatchedCount())
-                .maxReturnDate(resultDto.getMaxReturnDate())
-                .maxReturn(resultDto.getMaxReturn())
-                .minReturnDate(resultDto.getMinReturnDate())
-                .minReturn(resultDto.getMinReturn())
-                .lastMatchedDate(resultDto.getLastMatchedDate())
-                .lastMatchedReturn(resultDto.getLastMatchedReturn())
-                .totalReturn(resultDto.getTotalReturn())
+                .stock(stock)
+                .executedAt(executedAt)
+                .startDate(startDate)
+                .endDate(endDate)
+                .winRate(winRate)
+                .averageReturn(averageReturn)
+                .matchedCount(matchedCount)
+                .maxReturnDate(maxReturnDate)
+                .maxReturn(maxReturn)
+                .minReturnDate(minReturnDate)
+                .minReturn(minReturn)
+                .lastMatchedDate(lastMatchedDate)
+                .lastMatchedReturn(lastMatchedReturn)
+                .totalReturn(totalReturn)
                 .build();
 
-        backtestRepository.save(entity);
+        Backtest saved = backtestRepository.save(backtest);
 
-        return resultDto;
+        return BacktestResponseDTO.BacktestExecutionDTO.builder()
+                .backtestId(saved.getId())
+                .stockName(stock.getName())
+                .executedAt(executedAt)
+                .startDate(startDate)
+                .endDate(endDate)
+                .winRate(winRate)
+                .averageReturn(averageReturn)
+                .matchedCount(matchedCount)
+                .maxReturnDate(maxReturnDate)
+                .maxReturn(maxReturn)
+                .minReturnDate(minReturnDate)
+                .minReturn(minReturn)
+                .lastMatchedDate(lastMatchedDate)
+                .lastMatchedReturn(lastMatchedReturn)
+                .totalReturn(totalReturn)
+                .build();
     }
-
     // 과거 백테스팅 결과 상세 조회
     @Override
-    public BacktestResponseDTO.BacktestResultDetailDTO getBacktestResultDetail(Long backtestId) {
-        BacktestEntity entity = backtestRepository.findById(backtestId)
-                .orElseThrow(() -> new NoSuchElementException("백테스팅 결과가 존재하지 않습니다."));
+    @Transactional(readOnly = true)
+    public BacktestResponseDTO.BacktestResultDetailDTO getBacktestResultDetail(Long userId, Long backtestId) {
+
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        // 백테스팅 조회
+        Backtest backtest = backtestRepository.findById(backtestId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.BACKTEST_NOT_FOUND));
 
         return BacktestResponseDTO.BacktestResultDetailDTO.builder()
-                .stockName("삼성전자") // 종목 엔티티 생성 전 하드코딩
-//                .stockName(entity.getStock().getStockName) // 종목 엔티티 생성 후 캡션 제거
-                .stockImage("imageurl") // 종목 엔티티 생성 전 하드코딩
-//                .stockImage(bt.getStock().getImageUrl()) // 종목 엔티티 생성 후 캡션 제거
-                .executedAt(entity.getExecutedAt())
-                .startDate(entity.getStartDate())
-                .endDate(entity.getEndDate())
-                .winRate(entity.getWinRate())
-                .averageReturn(entity.getAverageReturn())
-                .matchedCount(entity.getMatchedCount())
-                .maxReturnDate(entity.getMaxReturnDate())
-                .maxReturn(entity.getMaxReturn())
-                .minReturnDate(entity.getMinReturnDate())
-                .minReturn(entity.getMinReturn())
-                .lastMatchedDate(entity.getLastMatchedDate())
-                .lastMatchedReturn(entity.getLastMatchedReturn())
-                .totalReturn(entity.getTotalReturn())
+                .backtestId(backtestId)
+                .stockName(backtest.getStock().getName())
+                .stockImage(backtest.getStock().getImageUrl())
+                .executedAt(backtest.getExecutedAt())
+                .startDate(backtest.getStartDate())
+                .endDate(backtest.getEndDate())
+                .winRate(backtest.getWinRate())
+                .averageReturn(backtest.getAverageReturn())
+                .matchedCount(backtest.getMatchedCount())
+                .maxReturnDate(backtest.getMaxReturnDate())
+                .maxReturn(backtest.getMaxReturn())
+                .minReturnDate(backtest.getMinReturnDate())
+                .minReturn(backtest.getMinReturn())
+                .lastMatchedDate(backtest.getLastMatchedDate())
+                .lastMatchedReturn(backtest.getLastMatchedReturn())
+                .totalReturn(backtest.getTotalReturn())
                 .build();
     }
 
     // 백테스팅 결과 목록 조회
     @Override
-    public Page<BacktestResponseDTO.BacktestSummaryDTO> getBacktestResultList(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("executedAt").descending());
-        Page<BacktestEntity> resultPage = backtestRepository.findAll(pageable);
+    @Transactional(readOnly = true)
+    public Page<BacktestResponseDTO.BacktestSummaryDTO> getBacktestResultList(Long userId, int page, int size) {
 
-        return resultPage.map(entity -> BacktestResponseDTO.BacktestSummaryDTO.builder()
-                .backtestId(entity.getId())
-                .stockName("삼성전자") // 종목 엔티티 생성 전 하드코딩
-//                .stockName(entity.getStock().getStockName) // 종목 엔티티 생성 후 캡션 제거
-                .executedAt(entity.getExecutedAt())
-                .winRate(entity.getWinRate())
-                .averageReturn(entity.getAverageReturn())
-                .matchedCount(entity.getMatchedCount())
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("executedAt").descending());
+        Page<Backtest> resultPage = backtestRepository.findByUserId(userId, pageable);
+
+        return resultPage.map(bt -> BacktestResponseDTO.BacktestSummaryDTO.builder()
+                .backtestId(bt.getId())
+                .stockName(bt.getStock().getName())
+                .executedAt(bt.getExecutedAt())
+                .winRate(bt.getWinRate())
+                .averageReturn(bt.getAverageReturn())
+                .matchedCount(bt.getMatchedCount())
                 .build());
     }
 

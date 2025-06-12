@@ -6,12 +6,12 @@ import org.springframework.data.domain.Page;
 
 public interface BacktestService {
     // 백테스팅 실행
-    BacktestResponseDTO.BacktestExecutionDTO runBacktest(Long patternId, Long stockId, BacktestRequestDTO request);
+    BacktestResponseDTO.BacktestExecutionDTO runBacktest(Long userId, Long patternId, Long stockId, BacktestRequestDTO request);
 
     // 백테스팅 결과 상세 조회
-    BacktestResponseDTO.BacktestResultDetailDTO getBacktestResultDetail(Long backtestId);
+    BacktestResponseDTO.BacktestResultDetailDTO getBacktestResultDetail(Long userId, Long backtestId);
 
     // 백테스팅 결과 목록 조회
-    Page<BacktestResponseDTO.BacktestSummaryDTO> getBacktestResultList(int page, int size);
+    Page<BacktestResponseDTO.BacktestSummaryDTO> getBacktestResultList(Long userId, int page, int size);
 
 }

@@ -21,8 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
-import static com.synergyx.trading.model.QBacktest.backtest;
-
 @Service
 @RequiredArgsConstructor
 public class BacktestServiceImpl implements BacktestService {

@@ -12,7 +12,9 @@ import java.util.Optional;
 @Repository
 public interface BacktestRepository extends JpaRepository<Backtest, Long> {
     // 패턴 별 백테스팅 결과 조회용 (최근 1개)
-    Optional<Backtest> findTopByUserIdAndPatternIdOrderByExecutedAtDesc(Long userId, Long patternId);
+    // 실행 날짜 동일할 경우, 아이디 내림차순.
+    Optional<Backtest> findTopByUserIdAndPatternIdOrderByExecutedAtDescIdDesc(Long userId, Long patternId);
+
     void deleteAllByPattern(Pattern pattern);
     Page<Backtest> findByUserId(Long userId, Pageable pageable);
 }

@@ -53,14 +53,17 @@ jobs:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
+          APPLICATION_YML: ${{ secrets.APPLICATION_YML }}
         run: |
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
+          echo "$APPLICATION_YML" > application.yml
           scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/trading-server.jar
+          scp -i private_key.pem -o StrictHostKeyChecking=no application.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/application.yml
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
             pgrep java | xargs -r kill -15  # 기존에 실행 중인 Java 프로세스 종료
             sleep 10
-            nohup java -jar /home/$EC2_USERNAME/trading-server.jar > app.log 2>&1 &  # 새 버전 애플리케이션 실행
+            nohup java -jar /home/$EC2_USERNAME/trading-server.jar --spring.config.location=file:/home/$EC2_USERNAME/application.yml > app.log 2>&1 &
           "
           rm -f private_key.pem  # 민감한 정보 삭제

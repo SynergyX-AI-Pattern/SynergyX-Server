@@ -73,8 +73,8 @@ jobs:
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
             pgrep java | xargs -r kill -15
             sleep 10
-            nohup java -jar /home/$EC2_USERNAME/trading-server.jar \
-              --spring.config.additional-location=file:/home/$EC2_USERNAME/application.yml \
+            nohup java -Dspring.config.location=file:/home/$EC2_USERNAME/application.yml \
+              -jar /home/$EC2_USERNAME/trading-server.jar \
               > app.log 2>&1 &
           "
 

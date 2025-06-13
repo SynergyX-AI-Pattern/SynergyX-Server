@@ -16,9 +16,18 @@ public class KisStockScheduler {
     /**
      * 매 1분마다 실행 (장 운영시간 기준: 09시~15시59분, 주말 제외)
      */
-    @Scheduled(cron = "10 * 9-15 * * MON-FRI")
-    public void fetchOhlcvEveryMinute() {
-        log.info("[스케줄러] 1분봉 데이터 수집 시작");
+//    @Scheduled(cron = "10 * 9-15 * * MON-FRI")
+//    public void fetchOhlcvEveryMinute() {
+//        log.info("[스케줄러] 1분봉 데이터 수집 시작");
+//        kisOhlcvUpdateService.updateOhlcvAll();
+//    }
+
+    /**
+     * 매 15분 10초에 실행 (장 운영시간 기준: 09시~15시59분, 주말 제외)
+     */
+    @Scheduled(cron = "10 */15 9-15 * * MON-FRI")
+    public void fetch15minOhlcv() {
+        log.info("[스케줄러] 15분봉 수집 시작");
         kisOhlcvUpdateService.updateOhlcvAll();
     }
 }

@@ -68,6 +68,7 @@ public class KisOhlcvUpdateService {
      *
      * @param stock 종목
      */
+    @Transactional
     private void updateOhlcvInternal(Stock stock) {
         JsonNode candles = fetchOhlcvCandles(stock.getSymbol());
 
@@ -78,12 +79,12 @@ public class KisOhlcvUpdateService {
             return;
         }
 
-        parseAndSaveOhlcv(candles, stock);
+        parseAndSaveOhlcv15Min(candles, stock);
         log.info("[OHLCV] {} 종목 분봉 데이터 저장 완료", stock.getSymbol());
     }
 
     /**
-     * 특정 종목의 주식당일분봉조회 데이터를 요청합니다.\
+     * 특정 종목의 주식당일분봉조회 데이터를 요청합니다.
      * KIS inquire-time-itemchartprice API (TR_ID: FHKST03010200) 호출.
      *
      * @param symbol 종목 코드
@@ -154,67 +155,53 @@ public class KisOhlcvUpdateService {
      * @param candles 캔들 배열
      * @param stock   종목
      */
-    private void parseAndSaveOhlcvFt(JsonNode candles, Stock stock) {
+    private void parseAndSaveOhlcv15Min(JsonNode candles, Stock stock) {
         Map<LocalDateTime, List<JsonNode>> grouped = new TreeMap<>();
 
-        // 1. 15분 단위로 그룹핑
         for (JsonNode candle : candles) {
-            try {
-                String date = candle.path("stck_bsop_date").asText();
-                String hour = candle.path("stck_cntg_hour").asText();
-                LocalDateTime timestamp = LocalDateTime.parse(date + hour, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            String date = candle.path("stck_bsop_date").asText();
+            String hour = candle.path("stck_cntg_hour").asText();
+            LocalDateTime timestamp = LocalDateTime.parse(date + hour, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 
-                // 15분 단위로 내림
-                int minute = (timestamp.getMinute() / 15) * 15;
-                LocalDateTime roundedTime = timestamp.withMinute(minute).withSecond(0).withNano(0);
+            int minute = (timestamp.getMinute() / 15) * 15;
+            LocalDateTime rounded = timestamp.withMinute(minute).withSecond(0).withNano(0);
 
-                grouped.computeIfAbsent(roundedTime, k -> new ArrayList<>()).add(candle);
-            } catch (Exception e) {
-                log.warn("[OHLCV] 캔들 시간 파싱 실패: {}", e.getMessage());
-            }
+            grouped.computeIfAbsent(rounded, k -> new ArrayList<>()).add(candle);
         }
 
-        // 2. 그룹별로 OHLCV 생성 및 저장
-        for (Map.Entry<LocalDateTime, List<JsonNode>> entry : grouped.entrySet()) {
+        for (var entry : grouped.entrySet()) {
             LocalDateTime timestamp = entry.getKey();
             List<JsonNode> group = entry.getValue();
 
-            try {
-                if (stockOhlcvRepository.existsByStockAndTimestamp(stock, timestamp)) continue;
+            if (stockOhlcvRepository.existsByStockAndTimestamp(stock, timestamp)) continue;
 
-                // 정렬
-                group.sort(Comparator.comparing(n -> {
-                    String d = n.path("stck_bsop_date").asText();
-                    String h = n.path("stck_cntg_hour").asText();
-                    return LocalDateTime.parse(d + h, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-                }));
+            group.sort(Comparator.comparing(n -> LocalDateTime.parse(
+                    n.path("stck_bsop_date").asText() + n.path("stck_cntg_hour").asText(),
+                    DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
+            )));
 
-                // open/close 계산
-                JsonNode first = group.get(0);
-                JsonNode last = group.get(group.size() - 1);
+            var first = group.get(0);
+            var last = group.get(group.size() - 1);
 
-                Double open = toDouble(first.path("stck_oprc").asText());
-                Double close = toDouble(last.path("stck_prpr").asText());
-                Double high = group.stream().map(n -> toDouble(n.path("stck_hgpr").asText())).filter(Objects::nonNull).max(Double::compare).orElse(null);
-                Double low = group.stream().map(n -> toDouble(n.path("stck_lwpr").asText())).filter(Objects::nonNull).min(Double::compare).orElse(null);
-                Long volume = group.stream().map(n -> toLong(n.path("cntg_vol").asText())).filter(Objects::nonNull).reduce(0L, Long::sum);
+            Double open = toDouble(first.path("stck_oprc").asText());
+            Double close = toDouble(last.path("stck_prpr").asText());
+            Double high = group.stream().map(n -> toDouble(n.path("stck_hgpr").asText())).max(Double::compare).orElse(null);
+            Double low = group.stream().map(n -> toDouble(n.path("stck_lwpr").asText())).min(Double::compare).orElse(null);
+            Long volume = group.stream().map(n -> toLong(n.path("cntg_vol").asText())).reduce(0L, Long::sum);
 
-                if (open == null || close == null || high == null || low == null || volume == null) continue;
+            if (open == null || close == null || high == null || low == null || volume == null || volume == 0) continue;
 
-                StockOhlcv ohlcv = StockOhlcv.builder()
-                        .stock(stock)
-                        .timestamp(timestamp)
-                        .open(open)
-                        .high(high)
-                        .low(low)
-                        .close(close)
-                        .volume(volume)
-                        .build();
+            StockOhlcv ohlcv = StockOhlcv.builder()
+                    .stock(stock)
+                    .timestamp(timestamp)
+                    .open(open)
+                    .high(high)
+                    .low(low)
+                    .close(close)
+                    .volume(volume)
+                    .build();
 
-                stockOhlcvRepository.save(ohlcv);
-            } catch (Exception e) {
-                log.error("[OHLCV] 15분봉 저장 실패 - symbol: {}, timestamp: {}, 에러: {}", stock.getSymbol(), timestamp, e.getMessage(), e);
-            }
+            stockOhlcvRepository.save(ohlcv);
         }
     }
 }

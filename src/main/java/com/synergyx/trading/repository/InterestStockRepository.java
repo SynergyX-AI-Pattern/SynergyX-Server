@@ -10,7 +10,11 @@ import java.util.Optional;
 @Repository
 public interface InterestStockRepository extends JpaRepository<InterestStock, Long> {
     Optional<InterestStock> findByUserIdAndStockId(Long userId, Long stockId);
+
     List<InterestStock> findAllByUserId(Long userId);
+
     void deleteByUserIdAndStockId(Long userId, Long stockId);
+
+    boolean existsByUserIdAndStockId(Long userId, Long stockId);
 }
 

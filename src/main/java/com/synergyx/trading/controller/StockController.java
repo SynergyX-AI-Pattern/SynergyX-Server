@@ -1,0 +1,44 @@
+package com.synergyx.trading.controller;
+
+import com.synergyx.trading.apiPayload.ApiResponse;
+import com.synergyx.trading.dto.stockDetail.StockDetailResponseDTO;
+import com.synergyx.trading.dto.stockSearch.StockSearchResponseDTO;
+import com.synergyx.trading.service.stockDetailService.StockDetailQueryService;
+import com.synergyx.trading.service.stockSearchService.StockSearchQueryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/stocks")
+@Tag(name = "종목 상세 API", description = "종목 상세 관련 API 입니다.")
+public class StockController {
+
+    // 임시 userId
+    private static final Long TEMP_USER_ID = 1L;
+
+    private final StockSearchQueryService stockSearchQueryService;
+    private final StockDetailQueryService stockDetailQueryService;
+
+    @Operation(summary = "종목 상세 조회", description = "종목 상세 정보를 조회합니다.")
+    @GetMapping("/{stockId}/detail")
+    public ResponseEntity<?> getStockDetail(@PathVariable Long stockId) {
+        StockDetailResponseDTO dto = stockDetailQueryService.getStockDetail(stockId, TEMP_USER_ID);
+        return ResponseEntity.ok(ApiResponse.onSuccess(dto));
+    }
+
+    @Operation(summary = "종목 검색", description = "종목명을 기준으로 종목을 검색합니다.")
+    @GetMapping("/search")
+    public ResponseEntity<?> searchStocks(
+            @Parameter(description = "검색할 종목명 (예: 삼성, 하이닉스)")
+            @RequestParam String query) {
+        List<StockSearchResponseDTO> result = stockSearchQueryService.searchStocksByName(query);
+        return ResponseEntity.ok(ApiResponse.onSuccess(result));
+    }
+}

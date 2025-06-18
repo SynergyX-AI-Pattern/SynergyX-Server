@@ -1,8 +1,13 @@
 package com.synergyx.trading.controller;
 
 import com.synergyx.trading.apiPayload.ApiResponse;
+import com.synergyx.trading.apiPayload.code.status.SuccessStatus;
+import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
+import com.synergyx.trading.apiPayload.exception.GeneralException;
+import com.synergyx.trading.dto.stockDetail.StockCandleResponseDTO;
 import com.synergyx.trading.dto.stockDetail.StockDetailResponseDTO;
 import com.synergyx.trading.dto.stockSearch.StockSearchResponseDTO;
+import com.synergyx.trading.service.stockService.candle.StockCandleQueryService;
 import com.synergyx.trading.service.stockService.detail.StockDetailQueryService;
 import com.synergyx.trading.service.stockService.search.StockSearchQueryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +30,7 @@ public class StockController {
 
     private final StockSearchQueryService stockSearchQueryService;
     private final StockDetailQueryService stockDetailQueryService;
+    private final StockCandleQueryService stockCandleQueryService;
 
     @Operation(summary = "종목 상세 조회", description = "종목 상세 정보를 조회합니다.")
     @GetMapping("/{stockId}/detail")
@@ -40,5 +46,28 @@ public class StockController {
             @RequestParam String query) {
         List<StockSearchResponseDTO> result = stockSearchQueryService.searchStocksByName(query);
         return ResponseEntity.ok(ApiResponse.onSuccess(result));
+    }
+
+    @Operation(summary = "특정 종목 캔들 데이터 조회", description = "interval에 따라 캔들 데이터를 조회합니다. (ex: 1D, 1W, 3M, 1Y)")
+    @GetMapping("/stocks/{stockId}/candles")
+    public ResponseEntity<?> getStockCandles(
+            @PathVariable Long stockId,
+            @RequestParam(defaultValue = "1D") String interval) {
+
+        List<StockCandleResponseDTO> candles;
+
+        switch (interval.toUpperCase()) {
+            case "1D" -> candles = stockCandleQueryService.getDailyCandles(stockId);
+//            case "1W" -> candles = stockCandleQueryService.getWeeklyCandles(stockId);
+//            case "3M" -> candles = stockCandleQueryService.getThreeMonthCandles(stockId);
+//            case "1Y" -> candles = stockCandleQueryService.getOneYearCandles(stockId);
+            default -> throw new GeneralException(ErrorStatus.INVALID_CANDLE_INTERVAL);
+        }
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+                candles,
+                SuccessStatus.SUCCESS_CHART_DATA.getCode(),
+                SuccessStatus.SUCCESS_CHART_DATA.getMessage()
+        ));
     }
 }

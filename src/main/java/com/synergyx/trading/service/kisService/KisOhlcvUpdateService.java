@@ -69,10 +69,10 @@ public class KisOhlcvUpdateService {
      * @param stock 종목
      */
     @Transactional
-    private void updateOhlcvInternal(Stock stock) {
+    public void updateOhlcvInternal(Stock stock) {
         JsonNode candles = fetchOhlcvCandles(stock.getSymbol());
 
-//        log.info("[OHLCV] 응답 전체 JSON ({}):\n{}", stock.getSymbol(), candles.toPrettyString());
+        log.info("[OHLCV] 응답 전체 JSON ({}):\n{}", stock.getSymbol(), candles.toPrettyString());
 
         if (!candles.isArray()) {
             log.warn("[OHLCV] 응답 포맷 오류 - symbol: {}", stock.getSymbol());
@@ -107,49 +107,6 @@ public class KisOhlcvUpdateService {
     }
 
     /**
-     * 1분봉 캔들 데이터를 파싱하고 DB에 저장합니다.
-     *
-     * @param candles 캔들 배열
-     * @param stock   종목
-     */
-    private void parseAndSaveOhlcv(JsonNode candles, Stock stock) {
-        for (JsonNode candle : candles) {
-            try {
-                String date = candle.path("stck_bsop_date").asText();
-                String hour = candle.path("stck_cntg_hour").asText();
-                LocalDateTime timestamp = LocalDateTime.parse(date + hour, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-
-                if (stockOhlcvRepository.existsByStockAndTimestamp(stock, timestamp)) continue;
-
-                // 체결량 없는 봉은 저장하지 않음
-                Long volume = toLong(candle.path("cntg_vol").asText());
-                if (volume == 0) continue;
-
-                Double open = toDouble(candle.path("stck_oprc").asText());
-                Double high = toDouble(candle.path("stck_hgpr").asText());
-                Double low = toDouble(candle.path("stck_lwpr").asText());
-                Double close = toDouble(candle.path("stck_prpr").asText());
-
-                if (open == null || high == null || low == null || close == null || volume == null) continue;
-
-                StockOhlcv ohlcv = StockOhlcv.builder()
-                        .stock(stock)
-                        .timestamp(timestamp)
-                        .open(open)
-                        .high(high)
-                        .low(low)
-                        .close(close)
-                        .volume(volume)
-                        .build();
-
-                stockOhlcvRepository.save(ohlcv);
-            } catch (Exception e) {
-                log.error("[OHLCV] 1분봉 저장 실패 - symbol: {}, 에러: {}", stock.getSymbol(), e.getMessage(), e);
-            }
-        }
-    }
-
-    /**
      * 캔들 데이터를 파싱하고 DB에 저장합니다. (15분봉)
      *
      * @param candles 캔들 배열
@@ -173,7 +130,7 @@ public class KisOhlcvUpdateService {
             LocalDateTime timestamp = entry.getKey();
             List<JsonNode> group = entry.getValue();
 
-            if (stockOhlcvRepository.existsByStockAndTimestamp(stock, timestamp)) continue;
+            if (stockOhlcvRepository.existsByStockIdAndTimestamp(stock.getId(), timestamp)) continue;
 
             group.sort(Comparator.comparing(n -> LocalDateTime.parse(
                     n.path("stck_bsop_date").asText() + n.path("stck_cntg_hour").asText(),
@@ -202,6 +159,49 @@ public class KisOhlcvUpdateService {
                     .build();
 
             stockOhlcvRepository.save(ohlcv);
+        }
+    }
+
+    /**
+     * 1분봉 캔들 데이터를 파싱하고 DB에 저장합니다.
+     *
+     * @param candles 캔들 배열
+     * @param stock   종목
+     */
+    private void parseAndSaveOhlcv(JsonNode candles, Stock stock) {
+        for (JsonNode candle : candles) {
+            try {
+                String date = candle.path("stck_bsop_date").asText();
+                String hour = candle.path("stck_cntg_hour").asText();
+                LocalDateTime timestamp = LocalDateTime.parse(date + hour, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+
+                if (stockOhlcvRepository.existsByStockIdAndTimestamp(stock.getId(), timestamp)) continue;
+
+                // 체결량 없는 봉은 저장하지 않음
+                Long volume = toLong(candle.path("cntg_vol").asText());
+                if (volume == 0) continue;
+
+                Double open = toDouble(candle.path("stck_oprc").asText());
+                Double high = toDouble(candle.path("stck_hgpr").asText());
+                Double low = toDouble(candle.path("stck_lwpr").asText());
+                Double close = toDouble(candle.path("stck_prpr").asText());
+
+                if (open == null || high == null || low == null || close == null || volume == null) continue;
+
+                StockOhlcv ohlcv = StockOhlcv.builder()
+                        .stock(stock)
+                        .timestamp(timestamp)
+                        .open(open)
+                        .high(high)
+                        .low(low)
+                        .close(close)
+                        .volume(volume)
+                        .build();
+
+                stockOhlcvRepository.save(ohlcv);
+            } catch (Exception e) {
+                log.error("[OHLCV] 1분봉 저장 실패 - symbol: {}, 에러: {}", stock.getSymbol(), e.getMessage(), e);
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.synergyx.trading.service.stockSearchService;
+package com.synergyx.trading.service.stockService.search;
 
 import com.synergyx.trading.dto.stockSearch.StockSearchResponseDTO;
 

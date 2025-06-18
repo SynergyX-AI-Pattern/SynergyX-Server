@@ -1,4 +1,4 @@
-package com.synergyx.trading.service.stockDetailService;
+package com.synergyx.trading.service.stockService.detail;
 
 import com.synergyx.trading.dto.stockDetail.StockDetailResponseDTO;
 

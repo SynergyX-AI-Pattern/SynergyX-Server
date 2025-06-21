@@ -1,4 +1,5 @@
 package com.synergyx.trading.dto.backtest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -7,7 +8,24 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class BacktestResponseDTO  {
-    // 백테스트 실행
+
+    // FastAPI에서 받은 응답을 감싸는 Wrapper DTO
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class BacktestWrapperResponseDTO {
+
+        // camelCase로 매핑
+        @JsonProperty("is_success")
+        private boolean isSuccess;
+
+        private String code;
+        private String message;
+        private BacktestExecutionDTO data;
+    }
+
+    // 백테스트 실행 결과
     @Getter
     @Builder
     @NoArgsConstructor

@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+import com.synergyx.trading.service.backtestService.client.BacktestClientService;
 
 import java.time.LocalDate;
 
@@ -28,6 +29,7 @@ public class BacktestServiceImpl implements BacktestService {
     private final BacktestRepository backtestRepository;
     private final StockRepository stockRepository;
     private final UserRepository userRepository;
+    private final BacktestClientService backtestClientService;
 
     // 백테스팅 실행
     @Override
@@ -54,61 +56,46 @@ public class BacktestServiceImpl implements BacktestService {
 
         }
 
-        // fastAPI 연결 후 수정.
-        // 분석 결과를 DB에 저장
-        // 백테스트 분석 결과 (목데이터)
-        LocalDate executedAt = LocalDate.now();
-        double winRate = 65.2;
-        double averageReturn = 12.5;
-        int matchedCount = 8;
-        LocalDate maxReturnDate = LocalDate.of(2024, 3, 15);
-        double maxReturn = 25.4;
-        LocalDate minReturnDate = LocalDate.of(2024, 2, 10);
-        double minReturn = -7.8;
-        LocalDate lastMatchedDate = LocalDate.of(2024, 4, 20);
-        double lastMatchedReturn = 9.3;
-        double totalReturn = 88.3;
+        BacktestResponseDTO.BacktestExecutionDTO result = backtestClientService.callBacktestAPI(patternId, stockId, startDate, endDate);
 
-        // DB 저장용 엔티티 생성
-        Backtest backtest = Backtest.builder()
+        Backtest saved = backtestRepository.save(Backtest.builder()
                 .user(user)
                 .pattern(pattern)
                 .stock(stock)
-                .executedAt(executedAt)
+                .executedAt(LocalDate.now())
                 .startDate(startDate)
                 .endDate(endDate)
-                .winRate(winRate)
-                .averageReturn(averageReturn)
-                .matchedCount(matchedCount)
-                .maxReturnDate(maxReturnDate)
-                .maxReturn(maxReturn)
-                .minReturnDate(minReturnDate)
-                .minReturn(minReturn)
-                .lastMatchedDate(lastMatchedDate)
-                .lastMatchedReturn(lastMatchedReturn)
-                .totalReturn(totalReturn)
-                .build();
-
-        Backtest saved = backtestRepository.save(backtest);
+                .winRate(result.getWinRate())
+                .averageReturn(result.getAverageReturn())
+                .matchedCount(result.getMatchedCount())
+                .maxReturnDate(result.getMaxReturnDate())
+                .maxReturn(result.getMaxReturn())
+                .minReturnDate(result.getMinReturnDate())
+                .minReturn(result.getMinReturn())
+                .lastMatchedDate(result.getLastMatchedDate())
+                .lastMatchedReturn(result.getLastMatchedReturn())
+                .totalReturn(result.getTotalReturn())
+                .build());
 
         return BacktestResponseDTO.BacktestExecutionDTO.builder()
                 .backtestId(saved.getId())
-                .stockName(stock.getName())
-                .executedAt(executedAt)
-                .startDate(startDate)
-                .endDate(endDate)
-                .winRate(winRate)
-                .averageReturn(averageReturn)
-                .matchedCount(matchedCount)
-                .maxReturnDate(maxReturnDate)
-                .maxReturn(maxReturn)
-                .minReturnDate(minReturnDate)
-                .minReturn(minReturn)
-                .lastMatchedDate(lastMatchedDate)
-                .lastMatchedReturn(lastMatchedReturn)
-                .totalReturn(totalReturn)
+                .stockName(saved.getStock().getName())
+                .executedAt(saved.getExecutedAt())
+                .matchedCount(saved.getMatchedCount())
+                .startDate(saved.getStartDate())
+                .endDate(saved.getEndDate())
+                .winRate(saved.getWinRate())
+                .averageReturn(saved.getAverageReturn())
+                .maxReturn(saved.getMaxReturn())
+                .maxReturnDate(saved.getMaxReturnDate())
+                .minReturn(saved.getMinReturn())
+                .minReturnDate(saved.getMinReturnDate())
+                .totalReturn(saved.getTotalReturn())
+                .lastMatchedDate(saved.getLastMatchedDate())
+                .lastMatchedReturn(saved.getLastMatchedReturn())
                 .build();
     }
+
     // 과거 백테스팅 결과 상세 조회
     @Override
     @Transactional(readOnly = true)

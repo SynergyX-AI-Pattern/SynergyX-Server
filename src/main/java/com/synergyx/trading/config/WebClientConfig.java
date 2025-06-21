@@ -16,4 +16,11 @@ public class WebClientConfig {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
+    @Bean
+    public WebClient fastApiWebClient() {
+        return WebClient.builder()
+                .baseUrl("http://localhost:8000") // TODO: FastAPI 주소
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
+    }
 }

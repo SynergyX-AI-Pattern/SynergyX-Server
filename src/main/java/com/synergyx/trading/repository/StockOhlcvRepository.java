@@ -17,7 +17,10 @@ public interface StockOhlcvRepository extends JpaRepository<StockOhlcv, Long> {
     @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM StockOhlcv s WHERE s.stock.id = :stockId AND s.timestamp = :timestamp")
     boolean existsByStockIdAndTimestamp(@Param("stockId") Long stockId, @Param("timestamp") LocalDateTime timestamp);
 
-    // 상위 n개 ohlcv 조회
+    // 상위 n개 ohlcv 조회 (1D)
     @Query("SELECT s FROM StockOhlcv s WHERE s.stock.id = :stockId ORDER BY s.timestamp DESC")
     List<StockOhlcv> findLastNCandlesByStock(@Param("stockId") Long stockId, Pageable pageable);
+
+    // 지정 시점 이후의 15분봉 캔들 데이터 조회 (1W, 3M, 1Y, 5Y)
+    List<StockOhlcv> findByStockIdAndTimestampAfter(Long stockId, LocalDateTime from);
 }

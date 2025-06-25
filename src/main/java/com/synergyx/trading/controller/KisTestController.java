@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/test/kis")
-@Tag(name = "Test API", description = "테스트 API 입니다.")
+@Tag(name = "    Test API", description = "테스트 API 입니다.")
 public class KisTestController {
 
     private final KisTokenService kisTokenService;

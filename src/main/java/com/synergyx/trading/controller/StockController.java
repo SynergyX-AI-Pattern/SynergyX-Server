@@ -48,21 +48,13 @@ public class StockController {
         return ResponseEntity.ok(ApiResponse.onSuccess(result));
     }
 
-    @Operation(summary = "특정 종목 캔들 데이터 조회", description = "interval에 따라 캔들 데이터를 조회합니다. (ex: 1D, 1W, 3M, 1Y)")
+    @Operation(summary = "특정 종목 캔들 데이터 조회", description = "interval에 따라 캔들 데이터를 조회합니다. (ex: 1D, 1W, 3M, 1Y, 5Y)")
     @GetMapping("/stocks/{stockId}/candles")
     public ResponseEntity<?> getStockCandles(
             @PathVariable Long stockId,
             @RequestParam(defaultValue = "1D") String interval) {
 
-        List<StockCandleResponseDTO> candles;
-
-        switch (interval.toUpperCase()) {
-            case "1D" -> candles = stockCandleQueryService.getDailyCandles(stockId);
-//            case "1W" -> candles = stockCandleQueryService.getWeeklyCandles(stockId);
-//            case "3M" -> candles = stockCandleQueryService.getThreeMonthCandles(stockId);
-//            case "1Y" -> candles = stockCandleQueryService.getOneYearCandles(stockId);
-            default -> throw new GeneralException(ErrorStatus.INVALID_CANDLE_INTERVAL);
-        }
+        List<StockCandleResponseDTO> candles = stockCandleQueryService.getCandles(stockId, interval);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 candles,

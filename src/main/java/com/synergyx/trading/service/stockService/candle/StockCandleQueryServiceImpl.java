@@ -3,20 +3,12 @@ package com.synergyx.trading.service.stockService.candle;
 import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
 import com.synergyx.trading.apiPayload.exception.GeneralException;
 import com.synergyx.trading.dto.stockDetail.StockCandleResponseDTO;
-import com.synergyx.trading.model.Stock;
-import com.synergyx.trading.model.StockOhlcv;
-import com.synergyx.trading.repository.StockOhlcvRepository;
-import com.synergyx.trading.repository.StockRepository;
+import com.synergyx.trading.service.stockService.candle.strategy.CandleCompressionStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,40 +17,25 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StockCandleQueryServiceImpl implements StockCandleQueryService {
 
-    private final StockRepository stockRepository;
-    private final StockOhlcvRepository stockOhlcvRepository;
+    private final List<CandleCompressionStrategy> strategies;
 
     /**
-     * 1일(12H) 분봉 캔들 데이터 조회
+     * 캔들 데이터를 조회합니다.
+     * <p>
+     * interval 에 따라 압축 전략을 적용합니다.
+     * CandleCompressionStrategy 인터페이스 기반으로 동적 매칭됩니다.
      *
-     * @param stockId 종목 ID
-     * @return 캔들 데이터 리스트
+     * @param stockId  종목 ID
+     * @param interval 캔들 구간 ("1D", "1W", "3M", "1Y", "5Y")
+     * @return 캔들 응답 DTO 리스트
      */
     @Transactional(readOnly = true)
-    public List<StockCandleResponseDTO> getDailyCandles(Long stockId) {
-        Stock stock = stockRepository.findById(stockId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.STOCK_NOT_FOUND));
-
-        Pageable pageable = PageRequest.of(0, 27);
-        List<StockOhlcv> candles = stockOhlcvRepository.findLastNCandlesByStock(stock.getId(), pageable); // 15분봉 기준 1day
-
-        if (candles.isEmpty() || candles == null) {
-            throw new GeneralException(ErrorStatus.CANDLE_DATA_NOT_FOUND);
-        }
-
-        Collections.reverse(candles);
-
-        return candles.stream()
-                .map(candle -> StockCandleResponseDTO.builder()
-                        .time(candle.getTimestamp())
-                        .open(candle.getOpen())
-                        .high(candle.getHigh())
-                        .low(candle.getLow())
-                        .close(candle.getClose())
-                        .volume(candle.getVolume())
-                        .build())
-                .filter(dto -> Objects.nonNull(dto.getOpen()) && Objects.nonNull(dto.getClose()))
-                .collect(Collectors.toList());
+    public List<StockCandleResponseDTO> getCandles(Long stockId, String interval) {
+        return strategies.stream()
+                .filter(strategy -> strategy.supports(interval))
+                .findFirst()
+                .orElseThrow(() -> new GeneralException(ErrorStatus.INVALID_CANDLE_INTERVAL))
+                .compress(stockId);
     }
 }
 

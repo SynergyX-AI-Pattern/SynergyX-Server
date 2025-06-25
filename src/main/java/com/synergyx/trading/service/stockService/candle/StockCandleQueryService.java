@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface StockCandleQueryService {
 
-    // 1일 캔들 조회
-    List<StockCandleResponseDTO> getDailyCandles(Long stockId);
+    // 캔들 데이터 조회
+    List<StockCandleResponseDTO> getCandles(Long stockId, String interval);
 }

@@ -1,10 +1,15 @@
 package com.synergyx.trading.controller;
 
 import com.synergyx.trading.apiPayload.ApiResponse;
+import com.synergyx.trading.apiPayload.code.status.SuccessStatus;
+import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
+import com.synergyx.trading.apiPayload.exception.GeneralException;
+import com.synergyx.trading.dto.stockDetail.StockCandleResponseDTO;
 import com.synergyx.trading.dto.stockDetail.StockDetailResponseDTO;
 import com.synergyx.trading.dto.stockSearch.StockSearchResponseDTO;
-import com.synergyx.trading.service.stockDetailService.StockDetailQueryService;
-import com.synergyx.trading.service.stockSearchService.StockSearchQueryService;
+import com.synergyx.trading.service.stockService.candle.StockCandleQueryService;
+import com.synergyx.trading.service.stockService.detail.StockDetailQueryService;
+import com.synergyx.trading.service.stockService.search.StockSearchQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +30,7 @@ public class StockController {
 
     private final StockSearchQueryService stockSearchQueryService;
     private final StockDetailQueryService stockDetailQueryService;
+    private final StockCandleQueryService stockCandleQueryService;
 
     @Operation(summary = "종목 상세 조회", description = "종목 상세 정보를 조회합니다.")
     @GetMapping("/{stockId}/detail")
@@ -40,5 +46,25 @@ public class StockController {
             @RequestParam String query) {
         List<StockSearchResponseDTO> result = stockSearchQueryService.searchStocksByName(query);
         return ResponseEntity.ok(ApiResponse.onSuccess(result));
+    }
+
+    @Operation(summary = "특정 종목 캔들 데이터 조회", description = "(현재는 1D, 1W만 지원합니다.) interval에 따라 캔들 데이터를 조회합니다. (ex: 1D, 1W, 3M, 1Y, 5Y)")
+    @GetMapping("/stocks/{stockId}/candles")
+    public ResponseEntity<?> getStockCandles(
+            @PathVariable Long stockId,
+            @RequestParam(defaultValue = "1D") String interval) {
+
+        // todo: 데이터 생성 이후 api 개발
+        if (interval.equals("3M") || interval.equals("1Y") || interval.equals("5Y")) {
+            throw new GeneralException(ErrorStatus.INVALID_CANDLE_INTERVAL);
+        }
+
+        List<StockCandleResponseDTO> candles = stockCandleQueryService.getCandles(stockId, interval);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+                candles,
+                SuccessStatus.SUCCESS_CHART_DATA.getCode(),
+                SuccessStatus.SUCCESS_CHART_DATA.getMessage()
+        ));
     }
 }

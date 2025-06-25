@@ -29,7 +29,8 @@ public enum SuccessStatus implements BaseCode {
     // 백테스팅
     SUCCESS_BACKTEST_EXECUTE(HttpStatus.OK, "BACKTEST200", "백테스트가 실행되었습니다."),
 
-
+    // 종목 상세
+    SUCCESS_CHART_DATA(HttpStatus.OK, "CANDLE200", "차트 데이터 조회 성공."),
     ;
 
     private final HttpStatus httpStatus;

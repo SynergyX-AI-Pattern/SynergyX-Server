@@ -1,4 +1,4 @@
-package com.synergyx.trading.service.stockDetailService;
+package com.synergyx.trading.service.stockService.detail;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

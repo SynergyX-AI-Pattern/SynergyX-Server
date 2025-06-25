@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/test/kis")
-@Tag(name = "Test API", description = "테스트 API 입니다.")
+@Tag(name = "    Test API", description = "테스트 API 입니다.")
 public class KisTestController {
 
     private final KisTokenService kisTokenService;
@@ -39,7 +39,7 @@ public class KisTestController {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", null));
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
         }
     }
 
@@ -54,7 +54,7 @@ public class KisTestController {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", null));
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
         }
     }
 
@@ -67,7 +67,7 @@ public class KisTestController {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", null));
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
         }
     }
 
@@ -82,7 +82,7 @@ public class KisTestController {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", null));
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
         }
     }
 
@@ -95,7 +95,7 @@ public class KisTestController {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", null));
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
         }
     }
 
@@ -110,7 +110,7 @@ public class KisTestController {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", null));
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
         }
     }
 
@@ -124,7 +124,7 @@ public class KisTestController {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", null));
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
         }
     }
 
@@ -140,7 +140,7 @@ public class KisTestController {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", null));
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
         }
     }
 
@@ -153,7 +153,7 @@ public class KisTestController {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", null));
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
         }
     }
 
@@ -168,7 +168,7 @@ public class KisTestController {
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", null));
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
         }
     }
 }

@@ -35,6 +35,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // 백테스팅 관련 예외 처리
     BACKTEST_NOT_FOUND(HttpStatus.NOT_FOUND, "BACKTEST404", "해당 백테스트 결과가 존재하지 않습니다."),
     BACKTEST_PERIOD_EXCEEDS_LIMIT(HttpStatus.BAD_REQUEST, "BACKTEST400", "백테스트 기간은 최대 5년까지 가능합니다."),
+    FASTAPI_BACKTEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "BACKTEST502", "FastAPI 백테스트 서버 호출에 실패했습니다."),
 
     // 캔들 데이터 관련 예외 처리
     CANDLE_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "CANDLE404", "캔들 데이터가 존재하지 않습니다."),

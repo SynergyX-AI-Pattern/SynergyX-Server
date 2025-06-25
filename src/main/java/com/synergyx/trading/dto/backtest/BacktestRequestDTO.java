@@ -16,5 +16,8 @@ public class BacktestRequestDTO {
     // JSON 문자열 -> LocalDate 타입 형변환
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate startDate; // 백테스트 시작일
+
+    // JSON 문자열 -> LocalDate 타입 형변환
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate endDate; // 백테스트 종료일
 }

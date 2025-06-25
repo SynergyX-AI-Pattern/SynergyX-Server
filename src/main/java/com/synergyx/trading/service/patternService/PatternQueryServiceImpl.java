@@ -56,7 +56,7 @@ public class PatternQueryServiceImpl implements PatternQueryService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_NOT_FOUND));
 
         // 백테스트 최근 결과
-        Optional<Backtest> backtest = backtestRepository.findTopByUserIdAndPatternIdOrderByExecutedAtDesc(userId, patternId);
+        Optional<Backtest> backtest = backtestRepository.findTopByUserIdAndPatternIdOrderByExecutedAtDescIdDesc(userId, patternId);
 
         PatternResponseDTO.BacktestResultDTO backtestResult = backtest.map(bt -> PatternResponseDTO.BacktestResultDTO.builder()
                 .backtestId(bt.getId())

@@ -23,4 +23,17 @@ public interface StockOhlcvRepository extends JpaRepository<StockOhlcv, Long> {
 
     // 지정 시점 이후의 15분봉 캔들 데이터 조회 (1W, 3M, 1Y, 5Y)
     List<StockOhlcv> findByStockIdAndTimestampAfter(Long stockId, LocalDateTime from);
+
+    // 거래대금 기반 랭킹 정렬 시 사용할 최신 timestamp 조회
+    @Query("SELECT MAX(o.timestamp) FROM StockOhlcv o")
+    LocalDateTime findLatestTimestamp();
+
+    // timestamp 기준 거래대금 높은 순 정렬
+    @Query("""
+                SELECT o FROM StockOhlcv o
+                JOIN FETCH o.stock
+                WHERE o.timestamp = :latest
+                ORDER BY (o.close * o.volume) DESC
+            """)
+    List<StockOhlcv> findTopByTimestamp(@Param("latest") LocalDateTime latest, Pageable pageable);
 }

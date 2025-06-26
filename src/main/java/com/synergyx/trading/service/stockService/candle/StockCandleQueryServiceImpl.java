@@ -26,13 +26,20 @@ public class StockCandleQueryServiceImpl implements StockCandleQueryService {
      * interval 에 따라 압축 전략을 적용합니다.
      * CandleCompressionStrategy 인터페이스 기반으로 동적 매칭됩니다.
      *
-     * @param stockId      종목 ID
-     * @param intervalCode 캔들 구간 ("1D", "1W", "3M", "1Y", "5Y")
+     * @param stockId     종목 ID
+     * @param intervalStr 캔들 구간 ("1D", "1W", "3M", "1Y", "5Y")
      * @return 캔들 응답 DTO 리스트
      */
     @Transactional(readOnly = true)
-    public List<StockCandleResponseDTO> getCandles(Long stockId, String intervalCode) {
-        CandleInterval interval = CandleInterval.fromCode(intervalCode);
+    public List<StockCandleResponseDTO> getCandles(Long stockId, String intervalStr) {
+
+        // todo: 3m, 1y, 5y 데이터 연동 전까지는 1w로 대체. 추후 삭제
+        String effectiveInterval = switch (intervalStr.toUpperCase()) {
+            case "3M", "1Y", "5Y" -> "1W";
+            default -> intervalStr;
+        };
+
+        CandleInterval interval = CandleInterval.fromCode(effectiveInterval);
 
         return strategies.stream()
                 .filter(strategy -> strategy.supports(interval))

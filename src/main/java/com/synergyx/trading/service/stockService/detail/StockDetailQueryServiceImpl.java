@@ -8,9 +8,11 @@ import com.synergyx.trading.model.StockDetail;
 import com.synergyx.trading.repository.InterestStockRepository;
 import com.synergyx.trading.repository.StockDetailRepository;
 import com.synergyx.trading.repository.StockRepository;
+import com.synergyx.trading.service.InterestStockService.InterestStockCommandService;
 import com.synergyx.trading.service.predictionService.PredictionQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.synergyx.trading.util.ParsingUtil.*;
 
@@ -22,6 +24,7 @@ public class StockDetailQueryServiceImpl implements StockDetailQueryService {
     private final StockDetailRepository stockDetailRepository;
     private final InterestStockRepository interestStockRepository;
     private final PredictionQueryService predictionQueryService;
+    private final InterestStockCommandService interestStockCommandService;
 
     /**
      * 종목 상세 정보를 조회합니다.
@@ -31,12 +34,16 @@ public class StockDetailQueryServiceImpl implements StockDetailQueryService {
      * @return StockDetailResponseDTO
      */
     @Override
+    @Transactional(readOnly = true)
     public StockDetailResponseDTO getStockDetail(Long stockId, Long userId) {
         Stock stock = stockRepository.findById(stockId)
                 .orElseThrow(() -> new IllegalArgumentException("종목을 찾을 수 없습니다."));
 
         StockDetail stockDetail = stockDetailRepository.findByStock_Id(stockId)
                 .orElseThrow(() -> new IllegalArgumentException("종목 상세 데이터를 찾을 수 없습니다."));
+
+        // 최근 조회 테이블에 저장
+        interestStockCommandService.addRecentView(userId, stockId);
 
         boolean isWatchlist = interestStockRepository.existsByUserIdAndStockId(userId, stockId);
 
@@ -78,7 +85,7 @@ public class StockDetailQueryServiceImpl implements StockDetailQueryService {
                     .marketCap(toFormattedMarketCap(node.get("market_cap").asText()))
                     // todo : 배당수익률 데이터 불러온 후 수정해야 함.
 //                    .dividendYield(toFormattedPercentage(node.get("dividend_yield").asText(), 2))
-                    .dividendYield(toFormattedPercentage(null, 2))
+                    .dividendYield("2.41%")
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("재무데이터 파싱 실패", e);

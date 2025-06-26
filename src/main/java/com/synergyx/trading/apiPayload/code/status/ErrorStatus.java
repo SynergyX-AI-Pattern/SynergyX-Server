@@ -11,9 +11,9 @@ import com.synergyx.trading.apiPayload.code.ErrorReasonDTO;
 public enum ErrorStatus implements BaseErrorCode {
 
     _INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500", "서버 에러, 관리자에게 문의 바랍니다."),
-    _BAD_REQUEST(HttpStatus.BAD_REQUEST,"COMMON400","잘못된 요청입니다."),
+    _BAD_REQUEST(HttpStatus.BAD_REQUEST, "COMMON400", "잘못된 요청입니다."),
     _BAD_REQUEST_SAME_STATE(HttpStatus.BAD_REQUEST, "COMMON4002", "수정하려는 데이터가 현재 상태와 동일합니다."),
-    _UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"COMMON401","인증이 필요합니다."),
+    _UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "COMMON401", "인증이 필요합니다."),
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
 
     // 사용자 관련 예외 처리
@@ -25,6 +25,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 종목 관련 예외 처리
     STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "STOCK404", "해당 종목을 찾을 수 없습니다."),
+    STOCK_DETAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "STOCK_DETAIL404", "해당 종목 상세 정보를 찾을 수 없습니다."),
 
     // 패턴 관련 예외 처리
     PATTERN_NOT_FOUND(HttpStatus.NOT_FOUND, "PATTERN404", "패턴이 존재하지 않습니다."),

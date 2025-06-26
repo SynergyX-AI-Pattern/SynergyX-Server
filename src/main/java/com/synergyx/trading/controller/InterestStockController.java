@@ -16,7 +16,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/watchlist")
+@RequestMapping
 @Tag(name = "관심종목 API", description = "관심종목 관련 API 입니다.")
 public class InterestStockController {
 
@@ -27,7 +27,7 @@ public class InterestStockController {
     private final InterestStockQueryService interestStockQueryService;
 
     @Operation(summary = "관심종목 등록", description = "사용자의 관심종목을 등록합니다.")
-    @PostMapping("/{stockId}")
+    @PostMapping("/watchlist/{stockId}")
     public ResponseEntity<?> addWatchlist(
             @Parameter
             @PathVariable Long stockId) {
@@ -39,7 +39,7 @@ public class InterestStockController {
     }
 
     @Operation(summary = "관심종목 해제", description = "사용자의 관심종목을 삭제합니다.")
-    @DeleteMapping("/{stockId}")
+    @DeleteMapping("/watchlist/{stockId}")
     public ResponseEntity<?> removeWatchlist(
             @Parameter
             @PathVariable Long stockId) {
@@ -51,9 +51,16 @@ public class InterestStockController {
     }
 
     @Operation(summary = "관심종목 목록 조회", description = "현재 등록된 관심종목 목록을 조회합니다.")
-    @GetMapping
+    @GetMapping("/watchlist")
     public ResponseEntity<?> getWatchlist() {
         List<InterestStockResponseDTO> list = interestStockQueryService.getInterestList(TEMP_USER_ID);
+        return ResponseEntity.ok(ApiResponse.onSuccess(list));
+    }
+
+    @Operation(summary = "최근 조회 종목 리스트 조회", description = "최근 조회한 종목 리스트를 조회합니다. (최대 20개)")
+    @GetMapping("/stocks/recent")
+    public ResponseEntity<?> getRecentViewStockList() {
+        List<InterestStockResponseDTO> list = interestStockQueryService.getRecentViewStocks(TEMP_USER_ID);
         return ResponseEntity.ok(ApiResponse.onSuccess(list));
     }
 }

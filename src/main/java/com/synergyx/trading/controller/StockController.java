@@ -2,13 +2,13 @@ package com.synergyx.trading.controller;
 
 import com.synergyx.trading.apiPayload.ApiResponse;
 import com.synergyx.trading.apiPayload.code.status.SuccessStatus;
-import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
-import com.synergyx.trading.apiPayload.exception.GeneralException;
+import com.synergyx.trading.dto.stockDetail.RankedStockDTO;
 import com.synergyx.trading.dto.stockDetail.StockCandleResponseDTO;
 import com.synergyx.trading.dto.stockDetail.StockDetailResponseDTO;
 import com.synergyx.trading.dto.stockSearch.StockSearchResponseDTO;
 import com.synergyx.trading.service.stockService.candle.StockCandleQueryService;
 import com.synergyx.trading.service.stockService.detail.StockDetailQueryService;
+import com.synergyx.trading.service.stockService.ranking.StockRankingQueryService;
 import com.synergyx.trading.service.stockService.search.StockSearchQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/stocks")
-@Tag(name = "종목 상세 API", description = "종목 상세 관련 API 입니다.")
+@Tag(name = "종목 상세 | 홈 API", description = "종목 상세, 홈 화면 관련 API 입니다.")
 public class StockController {
 
     // 임시 userId
@@ -31,6 +31,7 @@ public class StockController {
     private final StockSearchQueryService stockSearchQueryService;
     private final StockDetailQueryService stockDetailQueryService;
     private final StockCandleQueryService stockCandleQueryService;
+    private final StockRankingQueryService stockRankingQueryService;
 
     @Operation(summary = "종목 상세 조회", description = "종목 상세 정보를 조회합니다.")
     @GetMapping("/{stockId}/detail")
@@ -74,5 +75,19 @@ public class StockController {
                 SuccessStatus.SUCCESS_CHART_DATA.getCode(),
                 SuccessStatus.SUCCESS_CHART_DATA.getMessage()
         ));
+    }
+
+    @Operation(summary = "TOP 20 종목 조회", description = "TOP 20 종목을 조회합니다. (거래대금 기준)")
+    @GetMapping("/top20")
+    public ResponseEntity<?> getTop20Stocks() {
+        List<RankedStockDTO> list = stockRankingQueryService.getTop20();
+        return ResponseEntity.ok(ApiResponse.onSuccess(list));
+    }
+
+    @Operation(summary = "AI TOP 20 종목 조회", description = "AI TOP 20 종목을 조회합니다. (상승폭 기준)")
+    @GetMapping("/ai-top20")
+    public ResponseEntity<?> getAiTop20Stocks() {
+        List<RankedStockDTO> list = stockRankingQueryService.getAiTop20();
+        return ResponseEntity.ok(ApiResponse.onSuccess(list));
     }
 }

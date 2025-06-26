@@ -78,7 +78,7 @@ public class StockDetailQueryServiceImpl implements StockDetailQueryService {
                     .marketCap(toFormattedMarketCap(node.get("market_cap").asText()))
                     // todo : 배당수익률 데이터 불러온 후 수정해야 함.
 //                    .dividendYield(toFormattedPercentage(node.get("dividend_yield").asText(), 2))
-                    .dividendYield(toFormattedPercentage(null, 2))
+                    .dividendYield(null)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("재무데이터 파싱 실패", e);

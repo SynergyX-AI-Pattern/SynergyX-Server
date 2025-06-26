@@ -2,6 +2,9 @@ package com.synergyx.trading.util;
 
 import lombok.experimental.UtilityClass;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 @UtilityClass
 public class ParsingUtil {
 
@@ -78,6 +81,22 @@ public class ParsingUtil {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Double 값을 퍼센트 포맷 문자열로 반환합니다.
+     *
+     * @param value
+     * @param digits
+     * @return 변환된 문자열
+     */
+    public static String toFormattedPercentage(Double value, int digits) {
+        if (value == null) return "N/A";
+
+        BigDecimal percent = BigDecimal.valueOf(value)
+                .setScale(digits, RoundingMode.HALF_UP);
+
+        return percent + "%";
     }
 
     /**

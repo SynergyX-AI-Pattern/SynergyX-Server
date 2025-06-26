@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface InterestStockQueryService {
     List<InterestStockResponseDTO> getInterestList(Long userId);
+
+    List<InterestStockResponseDTO> getRecentViewStocks(Long userId);
 }

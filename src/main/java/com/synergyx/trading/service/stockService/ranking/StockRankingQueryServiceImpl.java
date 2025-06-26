@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -41,6 +42,7 @@ public class StockRankingQueryServiceImpl implements StockRankingQueryService {
      * @return 거래대금 기준 TOP 20 종목 목록
      */
     @Override
+    @Transactional(readOnly = true)
     public List<RankedStockDTO> getTop20() {
 //        log.info("[StockRanking] 거래대금 기준 TOP 20 조회 시작");
 
@@ -103,6 +105,7 @@ public class StockRankingQueryServiceImpl implements StockRankingQueryService {
      * @return AI 예측값의 상승폭 기준 TOP 20 종목 목록
      */
     @Override
+    @Transactional(readOnly = true)
     public List<RankedStockDTO> getAiTop20() {
         log.info("[StockRanking] AI 예측 기반 TOP20 랭킹 조회 시작");
 

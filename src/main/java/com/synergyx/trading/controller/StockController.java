@@ -48,16 +48,24 @@ public class StockController {
         return ResponseEntity.ok(ApiResponse.onSuccess(result));
     }
 
-    @Operation(summary = "특정 종목 캔들 데이터 조회", description = "(현재는 1D, 1W만 지원합니다.) interval에 따라 캔들 데이터를 조회합니다. (ex: 1D, 1W, 3M, 1Y, 5Y)")
+    @Operation(
+            summary = "종목 캔들 데이터 조회",
+            description = """
+                    `interval` (1D, 1W, 3M, 1Y, 5Y)에 따라 캔들 데이터를 조회합니다.
+                            
+                    ⚠️ 현재 3M, 1Y, 5Y는 임시로 1W 기준 캔들(약 40~50개)을 반환하며,  
+                    추후 실제 데이터 연동 시 캔들 수가 변경될 수 있습니다.
+                    """
+    )
     @GetMapping("/stocks/{stockId}/candles")
     public ResponseEntity<?> getStockCandles(
             @PathVariable Long stockId,
-            @RequestParam(defaultValue = "1D") String interval) {
-
-        // todo: 데이터 생성 이후 api 개발
-        if (interval.equals("3M") || interval.equals("1Y") || interval.equals("5Y")) {
-            throw new GeneralException(ErrorStatus.INVALID_CANDLE_INTERVAL);
-        }
+            @Parameter(
+                    name = "interval",
+                    description = "캔들 구간 (1D, 1W, 3M, 1Y, 5Y 중 하나 입력)",
+                    required = true
+            )
+            @RequestParam String interval) {
 
         List<StockCandleResponseDTO> candles = stockCandleQueryService.getCandles(stockId, interval);
 

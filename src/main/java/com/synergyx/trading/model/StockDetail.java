@@ -25,6 +25,9 @@ public class StockDetail extends BaseEntity {
     @Column
     private Double price;
 
+    @Column(name = "change_amount")
+    private Double changeAmount;
+
     @Column(name = "change_rate")
     private Double changeRate;
 

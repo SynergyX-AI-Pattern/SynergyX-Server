@@ -58,9 +58,7 @@ public class StockDetailQueryServiceImpl implements StockDetailQueryService {
                 .stockName(stock.getName())
                 .price(toFormattedNumber(stockDetail.getPrice()))
                 .changeRate(stockDetail.getChangeRate() + "%")
-                //Todo: change amount 추가
-//                .changeAmount(toFormattedNumber(stockDetail.getChangeAmount()))
-                .changeAmount("600")
+                .changeAmount(toFormattedNumber(stockDetail.getChangeAmount()))
                 .isWatchlist(isWatchlist)
                 .isTradeNotificationEnabled(isTradeNotificationEnabled)
                 .prediction(prediction)

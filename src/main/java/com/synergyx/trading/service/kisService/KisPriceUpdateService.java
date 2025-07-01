@@ -30,7 +30,7 @@ public class KisPriceUpdateService {
     private final ObjectMapper objectMapper;
 
     /**
-     * 시가총액/현재가/등락률 + PER/PBR 을 업데이트합니다.
+     * 시가총액/현재가/등락폭/등락률 + PER/PBR 을 업데이트합니다.
      */
     @Transactional
     public void updateStockDetailsFromKis() {
@@ -92,6 +92,7 @@ public class KisPriceUpdateService {
                 ),
                 "FHKST01010100"
         );
+//        log.info("[Price] 응답 전체 JSON ({}):\n{}", response);
 
         return (ObjectNode) response.get("output");
     }
@@ -106,8 +107,19 @@ public class KisPriceUpdateService {
      * @throws JsonProcessingException
      */
     private StockDetail createOrUpdateStockDetail(Stock stock, ObjectNode jsonNode) throws JsonProcessingException {
-        Double price = toDouble(jsonNode.get("stck_prpr").asText());
-        Double changeRate = toDouble(jsonNode.get("prdy_ctrt").asText());
+        Double price = toDouble(jsonNode.get("stck_prpr").asText()); // 현재가
+
+        String signCode = jsonNode.get("prdy_vrss_sign").asText(); // 등락부호 (1 : 상한, 2 : 상승, 3 : 보합, 4 : 하한, 5 : 하락)
+        Double rawChangeAmount = toDouble(jsonNode.get("prdy_vrss").asText()); // 등락폭
+
+        Double signedChangeAmount = switch (signCode) {
+            case "1", "2" -> rawChangeAmount;   // 상한 or 상승 → +
+            case "4", "5" -> -rawChangeAmount;  // 하한 or 하락 → -
+            case "3" -> 0.0;                    // 보합 → 0
+            default -> 0.0;
+        };
+
+        Double changeRate = toDouble(jsonNode.get("prdy_ctrt").asText()); // 등락률
 
         StockDetail stockDetail = stockDetailRepository.findById(stock.getId())
                 .orElse(StockDetail.builder().stock(stock).build());
@@ -129,6 +141,7 @@ public class KisPriceUpdateService {
         }
 
         stockDetail.setPrice(price);
+        stockDetail.setChangeAmount(signedChangeAmount);
         stockDetail.setChangeRate(changeRate);
         stockDetail.setFinancialData(financialDataNode.toString());
 

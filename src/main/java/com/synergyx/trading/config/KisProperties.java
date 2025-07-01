@@ -17,7 +17,7 @@ public class KisProperties {
     private String appSecret;
     @PostConstruct
     public void printKeys() {
-//        log.info("✅ KIS AppKey = {}", appKey);
-//        log.info("✅ KIS AppSecret = {}", appSecret); // todo: delete
+//        log.info("KIS AppKey = {}", appKey);
+//        log.info("KIS AppSecret = {}", appSecret);
     }
 }

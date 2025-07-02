@@ -54,6 +54,11 @@ public class ParsingUtil {
         return String.format("%,d", value);
     }
 
+    public static String toFormattedNumber(Double value) {
+        if (value == null) return "-";
+        return String.format("%,.0f", value);
+    }
+
     /**
      * 문자열을 소수점 1자리 문자열로 변환합니다. (배)
      *
@@ -87,7 +92,7 @@ public class ParsingUtil {
      * Double 값을 퍼센트 포맷 문자열로 반환합니다.
      *
      * @param value
-     * @param digits
+     * @param digits 소수점 자리 지정 ex: 1
      * @return 변환된 문자열
      */
     public static String toFormattedPercentage(Double value, int digits) {

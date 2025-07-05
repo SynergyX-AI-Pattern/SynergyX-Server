@@ -163,7 +163,7 @@ public class KisOhlcvUpdateService {
     }
 
     /**
-     * 1분봉 캔들 데이터를 파싱하고 DB에 저장합니다.
+     * 1분봉 캔들 데이터를 파싱하고 DB에 저장합니다. 사용 x
      *
      * @param candles 캔들 배열
      * @param stock   종목

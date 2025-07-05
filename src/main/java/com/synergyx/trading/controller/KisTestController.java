@@ -30,7 +30,7 @@ public class KisTestController {
         return ResponseEntity.ok("발급된 AccessToken: " + accessToken);
     }
 
-    @Operation(summary = "전체 Stock Detail 업데이트 API", description = "시가총액, 현재가, 등락률, per, pbr 을 가져옵니다.")
+    @Operation(summary = "전체 Stock Detail 업데이트 API", description = "시가총액, 현재가, 등락폭, 등락률, per, pbr 을 가져옵니다.")
     @PostMapping("/stocks/details")
     public ResponseEntity<?> updateStockDetails() {
         try {
@@ -43,7 +43,7 @@ public class KisTestController {
         }
     }
 
-    @Operation(summary = "개별 종목 Stock Detail 업데이트 API", description = "시가총액, 현재가, 등락률, per, pbr 을 가져옵니다.")
+    @Operation(summary = "개별 종목 Stock Detail 업데이트 API", description = "시가총액, 현재가, 등락폭, 등락률, per, pbr 을 가져옵니다.")
     @PostMapping("/stocks/{symbol}/details")
     public ResponseEntity<?> updateStockDetailsBySymbol(
             @Parameter(description = "종목 코드", required = true)
@@ -114,13 +114,12 @@ public class KisTestController {
         }
     }
 
-    // todo:수정
-    @Operation(summary = "전체 배당수익률 업데이트 API", description = "배당수익률 값을 가져옵니다.")
-//    @PostMapping("/stocks/div")
+    @Operation(summary = "전체 배당금 업데이트 API", description = "배당금 값을 가져옵니다.")
+    @PostMapping("/stocks/div")
     public ResponseEntity<?> updateDiv() {
         try {
-            kisDividendScheduleService.updateDividendYieldAll();
-            return ResponseEntity.ok(ApiResponse.onSuccess("STOCK_UPDATE_SUCCESS", "배당수익률 저장 완료"));
+            kisDividendScheduleService.updateDividendAll();
+            return ResponseEntity.ok(ApiResponse.onSuccess("STOCK_UPDATE_SUCCESS", "배당금 저장 완료"));
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -128,15 +127,14 @@ public class KisTestController {
         }
     }
 
-    // todo:수정
-    @Operation(summary = "개별 종목 배당수익률 업데이트 API", description = "개별 종목의 배당수익률 값을 가져옵니다.")
-//    @PostMapping("/stocks/{symbol}/div")
+    @Operation(summary = "개별 종목 배당금 업데이트 API", description = "개별 종목의 배당금 값을 가져옵니다.")
+    @PostMapping("/stocks/{symbol}/div")
     public ResponseEntity<?> updateDivBySymbol(
             @Parameter(description = "종목 코드", required = true)
             @PathVariable String symbol) {
         try {
-            kisDividendScheduleService.updateDividendYieldBySymbol(symbol);
-            return ResponseEntity.ok(ApiResponse.onSuccess("STOCK_UPDATE_SUCCESS", "배당수익률 저장 완료"));
+            kisDividendScheduleService.updateDividendBySymbol(symbol);
+            return ResponseEntity.ok(ApiResponse.onSuccess("STOCK_UPDATE_SUCCESS", "배당금 저장 완료"));
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -9,14 +9,17 @@ import com.synergyx.trading.repository.InterestStockRepository;
 import com.synergyx.trading.repository.StockDetailRepository;
 import com.synergyx.trading.repository.StockRepository;
 import com.synergyx.trading.service.InterestStockService.InterestStockCommandService;
+import com.synergyx.trading.service.kisService.KisDividendScheduleService;
 import com.synergyx.trading.service.predictionService.PredictionQueryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.synergyx.trading.util.ParsingUtil.*;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class StockDetailQueryServiceImpl implements StockDetailQueryService {
 
@@ -25,6 +28,7 @@ public class StockDetailQueryServiceImpl implements StockDetailQueryService {
     private final InterestStockRepository interestStockRepository;
     private final PredictionQueryService predictionQueryService;
     private final InterestStockCommandService interestStockCommandService;
+    private final KisDividendScheduleService kisDividendScheduleService;
 
     /**
      * 종목 상세 정보를 조회합니다.
@@ -52,15 +56,13 @@ public class StockDetailQueryServiceImpl implements StockDetailQueryService {
 
         StockDetailResponseDTO.PredictionDTO prediction = predictionQueryService.getPredictionByStockId(stock.getId());
 
-        StockDetailResponseDTO.FinancialsDTO financials = parseFinancialData(stockDetail.getFinancialData());
+        StockDetailResponseDTO.FinancialsDTO financials = parseFinancialData(stockDetail);
 
         return StockDetailResponseDTO.builder()
                 .stockName(stock.getName())
                 .price(toFormattedNumber(stockDetail.getPrice()))
                 .changeRate(stockDetail.getChangeRate() + "%")
-                //Todo: change amount 추가
-//                .changeAmount(toFormattedNumber(stockDetail.getChangeAmount()))
-                .changeAmount("600")
+                .changeAmount(toFormattedNumber(stockDetail.getChangeAmount()))
                 .isWatchlist(isWatchlist)
                 .isTradeNotificationEnabled(isTradeNotificationEnabled)
                 .prediction(prediction)
@@ -71,23 +73,30 @@ public class StockDetailQueryServiceImpl implements StockDetailQueryService {
     /**
      * 재무 데이터를 문자열 형식에 맞게 파싱합니다.
      *
-     * @param json 재무 데이터
+     * @param stockDetail 종목 상세
      * @return FinancialsDTO
      */
-    private StockDetailResponseDTO.FinancialsDTO parseFinancialData(String json) {
+    private StockDetailResponseDTO.FinancialsDTO parseFinancialData(StockDetail stockDetail) {
         try {
-            JsonNode node = new ObjectMapper().readTree(json);
+            JsonNode node = new ObjectMapper().readTree(stockDetail.getFinancialData());
+
+            // 배당수익률 계산
+            // 배당금 정보가 없거나 계산 불가할 경우 "-"로 대체
+            Double dividendYield = kisDividendScheduleService.calculateDividendYield(stockDetail);
+            String formattedDividendYield = (dividendYield == null)
+                    ? "-"
+                    : toFormattedPercentage(dividendYield, 2);
+
             return StockDetailResponseDTO.FinancialsDTO.builder()
                     .pbr(toFormattedRatio(node.get("pbr").asText()))
                     .per(toFormattedRatio(node.get("per").asText()))
                     .psr(toFormattedRatio(node.get("psr").asText()))
                     .roe(toFormattedPercentage(node.get("roe").asText(), 1))
                     .marketCap(toFormattedMarketCap(node.get("market_cap").asText()))
-                    // todo : 배당수익률 데이터 불러온 후 수정해야 함.
-//                    .dividendYield(toFormattedPercentage(node.get("dividend_yield").asText(), 2))
-                    .dividendYield("2.41%")
+                    .dividendYield(formattedDividendYield)
                     .build();
         } catch (Exception e) {
+            log.error("[DETAIL] 재무데이터 파싱 실패 - symbol Id: {}", stockDetail.getId(), e);
             throw new RuntimeException("재무데이터 파싱 실패", e);
         }
     }

@@ -32,16 +32,23 @@ public class KisTokenServiceImpl implements KisTokenService {
      * @return access token
      */
     @Override
-    public String getAccessToken() {
-        KisToken token = kisTokenRepository.findTopByOrderByUpdatedAtDesc();
+    public synchronized String getAccessToken() {
+        KisToken token = kisTokenRepository.findTopByOrderByExpiresAtDesc().orElse(null);
 
         if (token != null && !isExpired(token)) {
-            log.info("[KIS] DB에 저장된 유효한 AccessToken 사용");
+            log.info("[KIS] DB 유효한 토큰 재사용 - expiresAt: {}", token.getExpiresAt());
             return token.getAccessToken();
         }
 
-        log.info("[KIS] 토큰이 없거나 만료됨 → 새로 발급 요청");
+        // 토큰이 유효한지 재확인
+        if (token != null && token.getExpiresAt().isAfter(LocalDateTime.now())) {
+            log.warn("[KIS] expiresAt 유효하나 재발급 시도됨 -> 차단");
+            return token.getAccessToken();
+        }
+
         KisToken newToken = refreshAccessToken();
+        log.info("[KIS] 새로운 토큰 발급 완료 - expiresAt={}", newToken.getExpiresAt());
+
         return newToken.getAccessToken();
     }
 
@@ -49,7 +56,10 @@ public class KisTokenServiceImpl implements KisTokenService {
      * 토큰이 만료되었는지 확인합니다.
      */
     private boolean isExpired(KisToken token) {
-        return token.getExpiresAt().isBefore(LocalDateTime.now());
+
+        boolean expired = token.getExpiresAt().isBefore(LocalDateTime.now());
+        log.debug("[KIS] 토큰 만료 확인: expiresAt={}, now={}, expired={}", token.getExpiresAt(), LocalDateTime.now(), expired);
+        return expired;
     }
 
     /**
@@ -57,17 +67,26 @@ public class KisTokenServiceImpl implements KisTokenService {
      */
     private KisToken refreshAccessToken() {
         String responseBody = requestNewToken();
+        log.debug("[KIS] 발급 응답: {}", responseBody);
 
         try {
             JsonNode json = objectMapper.readTree(responseBody);
 
+            String accessToken = json.get("access_token").asText();
+
+            // 동일 액세스 토큰을 응답받은 경우
+            if (kisTokenRepository.existsByAccessToken(accessToken)) {
+                log.warn("[KIS] 이미 발급된 토큰을 다시 응답 받음 → 저장 생략");
+                return kisTokenRepository.findTopByOrderByExpiresAtDesc().orElse(null);
+            }
+
+            String expiresAtRaw = json.get("access_token_token_expired").asText();
+            LocalDateTime expiresAt = LocalDateTime.parse(expiresAtRaw, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
             KisToken newToken = KisToken.builder()
-                    .accessToken(json.get("access_token").asText())
+                    .accessToken(accessToken)
                     .tokenType("Bearer")
-                    .expiresAt(LocalDateTime.parse(
-                            json.get("access_token_token_expired").asText(),
-                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                    ))
+                    .expiresAt(expiresAt)
                     .build();
 
             return kisTokenRepository.save(newToken);

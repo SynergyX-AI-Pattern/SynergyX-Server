@@ -39,7 +39,7 @@ public class KisOhlcvUpdateService {
         for (Stock stock : stocks) {
             try {
                 updateOhlcvInternal(stock);
-                Thread.sleep(200); // API 제한 방지
+                Thread.sleep(10_000); // API 호출 제한
             } catch (Exception e) {
                 log.error("[OHLCV] {} 업데이트 실패: {}", stock.getSymbol(), e.getMessage(), e);
             }

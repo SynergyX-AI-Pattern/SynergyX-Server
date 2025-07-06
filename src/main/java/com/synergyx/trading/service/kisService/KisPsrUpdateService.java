@@ -40,7 +40,7 @@ public class KisPsrUpdateService {
         for (Stock stock : stocks) {
             try {
                 updatePsrInternal(stock);
-                Thread.sleep(200);
+                Thread.sleep(10_000); // API 호출 제한
             } catch (Exception e) {
                 log.error("[PSR] {} PSR 업데이트 실패: {}", stock.getSymbol(), e.getMessage(), e);
             }

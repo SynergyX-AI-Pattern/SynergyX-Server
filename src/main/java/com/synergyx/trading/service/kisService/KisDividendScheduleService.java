@@ -45,7 +45,7 @@ public class KisDividendScheduleService {
         for (Stock stock : stocks) {
             try {
                 updateDividendAmountInternal(stock);
-                Thread.sleep(300); // API 호출 제한
+                Thread.sleep(10_000); // API 호출 제한
             } catch (Exception e) {
                 log.error("[DIV] {} 배당금 업데이트 실패: {}", stock.getSymbol(), e.getMessage(), e);
             }

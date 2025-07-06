@@ -45,7 +45,7 @@ public class KisPriceUpdateService {
 
                 stockDetailRepository.save(detail);
                 log.info("[KIS] {} 종목 {}됨", stock.getSymbol(), isNew ? "신규 등록" : "업데이트");
-                Thread.sleep(200); // api 호출 제한으로 대기 (1초에 20회)
+                Thread.sleep(10_000); // API 호출 제한
 
             } catch (Exception e) {
                 log.error("[KIS] Failed to update stock detail for {}: {}", stock.getSymbol(), e.getMessage(), e);

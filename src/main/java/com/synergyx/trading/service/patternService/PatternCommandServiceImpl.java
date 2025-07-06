@@ -4,7 +4,7 @@ import com.synergyx.trading.apiPayload.exception.GeneralException;
 import com.synergyx.trading.dto.pattern.PatternRequestDTO;
 import com.synergyx.trading.dto.pattern.PatternResponseDTO;
 import com.synergyx.trading.model.Pattern;
-import com.synergyx.trading.model.PeriodUnit;
+import com.synergyx.trading.enums.PeriodUnit;
 import com.synergyx.trading.model.User;
 import com.synergyx.trading.repository.BacktestRepository;
 import com.synergyx.trading.repository.PatternApplyRepository;

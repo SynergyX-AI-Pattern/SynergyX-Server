@@ -31,6 +31,15 @@ public enum SuccessStatus implements BaseCode {
 
     // 종목 상세
     SUCCESS_CHART_DATA(HttpStatus.OK, "CANDLE200", "차트 데이터 조회 성공."),
+
+    // 알림
+    SUCCESS_NOTIFICATION_SENT(HttpStatus.OK, "NOTIFICATION200", "알림이 전송되었습니다."),
+    SUCCESS_NOTIFICATION_READ(HttpStatus.OK, "NOTIFICATION200", "알림을 읽음 처리했습니다."),
+    SUCCESS_NOTIFICATION_DELETED(HttpStatus.OK, "NOTIFICATION200", "알림이 삭제되었습니다."),
+
+    // 사용자
+    SUCCESS_FCM_TOKEN_UPDATED(HttpStatus.OK, "FCM200", "FCM 토큰이 성공적으로 저장되었습니다."),
+
     ;
 
     private final HttpStatus httpStatus;

@@ -55,19 +55,24 @@ jobs:
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
           APPLICATION_YML_BASE64: ${{ secrets.APPLICATION_YML_BASE64 }}
+          FIREBASE_JSON_BASE64: ${{ secrets.FIREBASE_JSON_BASE64 }}
         run: |
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
 
-          # 디코딩된 yml 생성
+          # 디코딩된 application.yml 생성
           echo "$APPLICATION_YML_BASE64" | base64 -d > application.yml
+          
+          # firebase.json 디코딩
+          echo "$FIREBASE_JSON_BASE64" | base64 -d > firebase.json
 
           # jar 파일 찾기
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
 
-          # 파일 전송
+          # EC2로 파일 전송
           scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/trading-server.jar
           scp -i private_key.pem -o StrictHostKeyChecking=no application.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/application.yml
+          scp -i private_key.pem -o StrictHostKeyChecking=no firebase.json $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/firebase.json
 
           # 서버 재시작
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "

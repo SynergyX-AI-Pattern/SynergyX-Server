@@ -58,7 +58,7 @@ public class KisTokenServiceImpl implements KisTokenService {
     private boolean isExpired(KisToken token) {
 
         boolean expired = token.getExpiresAt().isBefore(LocalDateTime.now());
-        log.debug("[KIS] 토큰 만료 확인: expiresAt={}, now={}, expired={}", token.getExpiresAt(), LocalDateTime.now(), expired);
+//        log.debug("[KIS] 토큰 만료 확인: expiresAt={}, now={}, expired={}", token.getExpiresAt(), LocalDateTime.now(), expired);
         return expired;
     }
 
@@ -67,7 +67,7 @@ public class KisTokenServiceImpl implements KisTokenService {
      */
     private KisToken refreshAccessToken() {
         String responseBody = requestNewToken();
-        log.debug("[KIS] 발급 응답: {}", responseBody);
+//        log.debug("[KIS] 발급 응답: {}", responseBody);
 
         try {
             JsonNode json = objectMapper.readTree(responseBody);

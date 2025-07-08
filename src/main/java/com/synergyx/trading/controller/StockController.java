@@ -57,7 +57,7 @@ public class StockController {
                     ⚠️ 현재 3M, 1Y, 5Y는 임시로 1W 기준 캔들(약 40~50개)을 반환하며,  
                     추후 실제 데이터 연동 시 캔들 수가 변경될 수 있습니다.
                     """
-    )
+    )// todo:description 수정
     @GetMapping("/stocks/{stockId}/candles")
     public ResponseEntity<?> getStockCandles(
             @PathVariable Long stockId,

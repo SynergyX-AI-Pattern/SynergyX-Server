@@ -1,6 +1,7 @@
 package com.synergyx.trading.model;
 
 import com.synergyx.trading.converter.PatternPointsConverter;
+import com.synergyx.trading.enums.PeriodUnit;
 import com.synergyx.trading.model.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;

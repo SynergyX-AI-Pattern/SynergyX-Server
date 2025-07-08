@@ -42,6 +42,11 @@ public enum ErrorStatus implements BaseErrorCode {
     CANDLE_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "CANDLE404", "캔들 데이터가 존재하지 않습니다."),
     INVALID_CANDLE_INTERVAL(HttpStatus.BAD_REQUEST, "CANDLE4001", "유효하지 않은 캔들 조회 주기입니다."),
 
+    // 알림 데이터 관련 예외 처리
+    INVALID_FCM_TOKEN(HttpStatus.BAD_REQUEST, "NOTIFICATION401", "유효하지 않은 FCM 토큰입니다."),
+    FCM_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "NOTIFICATION400", "FCM 토큰이 존재하지 않아 알림을 전송할 수 없습니다."),
+    INVALID_NOTIFICATION_TYPE(HttpStatus.BAD_REQUEST, "NOTIFICATION4001", "유효하지 않은 알림 타입입니다."),
+
     ;
 
     private final HttpStatus httpStatus;

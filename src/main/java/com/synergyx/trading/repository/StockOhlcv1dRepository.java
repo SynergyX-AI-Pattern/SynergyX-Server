@@ -8,5 +8,9 @@ import java.util.Optional;
 
 public interface StockOhlcv1dRepository extends JpaRepository<StockOhlcv1d, Long> {
 
+    // 중복 방지
     Optional<StockOhlcv1d> findByStock_IdAndTimestamp(Long stockId, LocalDateTime timestamp);
+
+    // 중복 확인
+    boolean existsByStockIdAndTimestamp(Long stockId, LocalDateTime timestamp);
 }

@@ -35,6 +35,8 @@ public class KisDividendScheduleService {
     private final StockDetailRepository stockDetailRepository;
     private final ObjectMapper objectMapper;
 
+    private static final int REQUEST_INTERVAL_MILLIS = 400;
+
     /**
      * 전체 종목의 배당금 (dividend_amount)을 업데이트합니다.
      */
@@ -45,7 +47,7 @@ public class KisDividendScheduleService {
         for (Stock stock : stocks) {
             try {
                 updateDividendAmountInternal(stock);
-                Thread.sleep(10_000); // API 호출 제한
+                Thread.sleep(REQUEST_INTERVAL_MILLIS); // API 호출 제한
             } catch (Exception e) {
                 log.error("[DIV] {} 배당금 업데이트 실패: {}", stock.getSymbol(), e.getMessage(), e);
             }

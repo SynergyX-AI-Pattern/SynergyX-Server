@@ -30,6 +30,8 @@ public class KisPsrUpdateService {
     private final StockDetailRepository stockDetailRepository;
     private final ObjectMapper objectMapper;
 
+    private static final int REQUEST_INTERVAL_MILLIS = 400;
+
     /**
      * 전체 PSR 을 업데이트합니다.
      */
@@ -40,7 +42,7 @@ public class KisPsrUpdateService {
         for (Stock stock : stocks) {
             try {
                 updatePsrInternal(stock);
-                Thread.sleep(10_000); // API 호출 제한
+                Thread.sleep(REQUEST_INTERVAL_MILLIS); // API 호출 제한
             } catch (Exception e) {
                 log.error("[PSR] {} PSR 업데이트 실패: {}", stock.getSymbol(), e.getMessage(), e);
             }

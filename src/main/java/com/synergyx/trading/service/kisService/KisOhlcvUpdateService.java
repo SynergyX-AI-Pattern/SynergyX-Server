@@ -29,6 +29,8 @@ public class KisOhlcvUpdateService {
     private final StockRepository stockRepository;
     private final StockOhlcvRepository stockOhlcvRepository;
 
+    private static final int REQUEST_INTERVAL_MILLIS = 200;
+
     /**
      * 전체 종목의 OHLCV 분봉 데이터를 업데이트합니다.
      */
@@ -39,7 +41,7 @@ public class KisOhlcvUpdateService {
         for (Stock stock : stocks) {
             try {
                 updateOhlcvInternal(stock);
-                Thread.sleep(10_000); // API 호출 제한
+                Thread.sleep(REQUEST_INTERVAL_MILLIS); // API 호출 제한
             } catch (Exception e) {
                 log.error("[OHLCV] {} 업데이트 실패: {}", stock.getSymbol(), e.getMessage(), e);
             }

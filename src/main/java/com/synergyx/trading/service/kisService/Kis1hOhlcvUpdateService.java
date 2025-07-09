@@ -107,9 +107,8 @@ public class Kis1hOhlcvUpdateService {
         log.info("[{}] 3개월 1시간봉 수집 시작", stock.getSymbol());
 
         // 15:30부터 시작
-        //todo delete
-//        LocalDateTime end = LocalDateTime.now().withHour(15).withMinute(59).withSecond(59).withNano(0);
-        LocalDateTime end = LocalDateTime.of(2025, 6, 29, 15, 59, 59);
+        LocalDateTime end = LocalDateTime.now().withHour(15).withMinute(59).withSecond(59).withNano(0);
+//        LocalDateTime end = LocalDateTime.of(2025, 6, 29, 15, 59, 59); 테스트용
 
         // 3개월 전
         LocalDateTime start = end.minusMonths(3);

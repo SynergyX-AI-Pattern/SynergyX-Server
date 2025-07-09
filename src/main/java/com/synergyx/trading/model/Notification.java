@@ -40,6 +40,4 @@ public class Notification extends BaseEntity {
     @Builder.Default
     @Column(name = "is_valid", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
     private Boolean isValid = true; // 삭제 여부
-
-
 }

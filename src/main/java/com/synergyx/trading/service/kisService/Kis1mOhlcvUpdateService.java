@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -29,7 +30,7 @@ public class Kis1mOhlcvUpdateService {
     private final StockRepository stockRepository;
     private final StockOhlcv1mRepository stockOhlcv1mRepository;
 
-    private static final int REQUEST_INTERVAL_MILLIS = 10_000;
+    private static final int REQUEST_INTERVAL_MILLIS = 5000; // 5초
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
@@ -107,11 +108,22 @@ public class Kis1mOhlcvUpdateService {
 
         LocalDateTime end = LocalDateTime.now().withDayOfMonth(1); // 이번 달 1일
         LocalDateTime minTimestamp = end.minusYears(5); // 5년 이전
-//        LocalDateTime minTimestamp = end.minusDays(39); //  1회 테스트용
 
         while (true) {
+
+            if (end.isBefore(minTimestamp)) {
+                log.info("[END] {}: 수집 범위 종료 (end < minTimestamp)", stock.getSymbol());
+                break;
+            }
+
             String endDate = end.format(DATE_FORMAT);
-            String startDate = end.minusDays(99).format(DATE_FORMAT); // 최대 100건 요청
+            String startDate = minTimestamp.format(DATE_FORMAT); // 최대 100건 요청
+
+            // 날짜 역전 방지
+            if (LocalDate.parse(startDate, DATE_FORMAT).isAfter(LocalDate.parse(endDate, DATE_FORMAT))) {
+                log.warn("[SKIP] 잘못된 날짜 범위: startDate={} > endDate={}", startDate, endDate);
+                break;
+            }
 
             JsonNode candles = fetchOhlcvCandles(stock.getSymbol(), startDate, endDate);
             if (!candles.isArray() || candles.isEmpty()) {
@@ -146,7 +158,7 @@ public class Kis1mOhlcvUpdateService {
 
             // 다음 요청 범위 조정
             String earliest = sorted.get(0).path("stck_bsop_date").asText();
-            end = LocalDateTime.parse(earliest + "000000", DATE_TIME_FORMAT).minusDays(1);
+            end = LocalDateTime.parse(earliest + "000000", DATE_TIME_FORMAT).minusMonths(1);
 
             sleep(REQUEST_INTERVAL_MILLIS);
         }

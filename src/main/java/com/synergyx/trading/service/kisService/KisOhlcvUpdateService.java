@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synergyx.trading.model.Stock;
 import com.synergyx.trading.model.StockOhlcv;
+import com.synergyx.trading.model.StockOhlcv1d;
+import com.synergyx.trading.repository.StockOhlcv1dRepository;
 import com.synergyx.trading.repository.StockOhlcvRepository;
 import com.synergyx.trading.repository.StockRepository;
 import com.synergyx.trading.service.kisService.client.KisApiClient;
@@ -28,6 +30,9 @@ public class KisOhlcvUpdateService {
     private final ObjectMapper objectMapper;
     private final StockRepository stockRepository;
     private final StockOhlcvRepository stockOhlcvRepository;
+    private final StockOhlcv1dRepository stockOhlcv1dRepository;
+
+    private static final int REQUEST_INTERVAL_MILLIS = 200;
 
     /**
      * 전체 종목의 OHLCV 분봉 데이터를 업데이트합니다.
@@ -39,7 +44,7 @@ public class KisOhlcvUpdateService {
         for (Stock stock : stocks) {
             try {
                 updateOhlcvInternal(stock);
-                Thread.sleep(200); // API 제한 방지
+                Thread.sleep(REQUEST_INTERVAL_MILLIS); // API 호출 제한
             } catch (Exception e) {
                 log.error("[OHLCV] {} 업데이트 실패: {}", stock.getSymbol(), e.getMessage(), e);
             }
@@ -201,6 +206,63 @@ public class KisOhlcvUpdateService {
                 stockOhlcvRepository.save(ohlcv);
             } catch (Exception e) {
                 log.error("[OHLCV] 1분봉 저장 실패 - symbol: {}, 에러: {}", stock.getSymbol(), e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * 15분봉 데이터를 기반으로 1일봉을 생성합니다.
+     * - 장 시작~마감까지의 고가, 저가, 시가, 종가, 거래량을 집계
+     * - 종목별 중복 저장 방지
+     *
+     * @param start 시작 시간 (보통 당일 09:00)
+     * @param end   종료 시간 (보통 당일 15:59)
+     */
+    public void generateDailyOhlcvFrom15min(LocalDateTime start, LocalDateTime end) {
+        List<Stock> stocks = stockRepository.findAll();
+        LocalDateTime dailyTimestamp = start.toLocalDate().atStartOfDay();
+
+        for (Stock stock : stocks) {
+            try {
+                List<StockOhlcv> candles = stockOhlcvRepository
+                        .findByStockIdAndTimestampBetweenOrderByTimestampAsc(stock.getId(), start, end);
+
+                if (candles.isEmpty()) {
+                    log.info("[SKIP] {}: 15분봉 데이터 없음 ({} ~ {})", stock.getSymbol(), start, end);
+                    continue;
+                }
+
+                double open = candles.get(0).getOpen();
+                double close = candles.get(candles.size() - 1).getClose();
+                double high = candles.stream().mapToDouble(StockOhlcv::getHigh).max().orElse(open);
+                double low = candles.stream().mapToDouble(StockOhlcv::getLow).min().orElse(open);
+                long volume = candles.stream().mapToLong(StockOhlcv::getVolume).sum();
+
+                if (volume == 0) {
+                    log.warn("[SKIP] {}: 거래량 0 → 저장 생략", stock.getSymbol());
+                    continue;
+                }
+
+                if (stockOhlcv1dRepository.existsByStockIdAndTimestamp(stock.getId(), dailyTimestamp)) {
+                    log.info("[SKIP] {}: 이미 1일봉 존재함 ({})", stock.getSymbol(), dailyTimestamp.toLocalDate());
+                    continue;
+                }
+
+                StockOhlcv1d ohlcv = StockOhlcv1d.builder()
+                        .stock(stock)
+                        .timestamp(dailyTimestamp)
+                        .open(open)
+                        .close(close)
+                        .high(high)
+                        .low(low)
+                        .volume(volume)
+                        .build();
+
+                stockOhlcv1dRepository.save(ohlcv);
+                log.info("[SAVE] {}: 1일봉 저장 완료 ({})", stock.getSymbol(), dailyTimestamp.toLocalDate());
+
+            } catch (Exception e) {
+                log.error("[ERROR] {}: 1일봉 생성 실패", stock.getSymbol(), e);
             }
         }
     }

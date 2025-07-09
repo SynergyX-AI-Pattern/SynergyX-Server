@@ -25,6 +25,8 @@ public class KisRoeUpdateService {
     private final ObjectMapper objectMapper;
     private final KisTokenService tokenService;
 
+    private static final int REQUEST_INTERVAL_MILLIS = 400;
+
     /**
      * ROE 를 업데이트합니다.
      */
@@ -79,7 +81,7 @@ public class KisRoeUpdateService {
                 stockDetailRepository.save(detail);
 //                log.info("[KIS] ROE value saved for stock {}", detail.getStock().getSymbol());
 
-                Thread.sleep(200); // api 호출 제한으로 대기 (1초에 20회)
+                Thread.sleep(REQUEST_INTERVAL_MILLIS); // API 호출 제한
             } catch (Exception e) {
                 log.warn("[KIS] Failed to update ROE for {}: {}", detail.getStock().getSymbol(), e.getMessage());
             }

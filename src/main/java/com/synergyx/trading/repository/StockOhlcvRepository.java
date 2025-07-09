@@ -14,8 +14,7 @@ import java.util.List;
 public interface StockOhlcvRepository extends JpaRepository<StockOhlcv, Long> {
 
     // ohlcv 중복 확인
-    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM StockOhlcv s WHERE s.stock.id = :stockId AND s.timestamp = :timestamp")
-    boolean existsByStockIdAndTimestamp(@Param("stockId") Long stockId, @Param("timestamp") LocalDateTime timestamp);
+    boolean existsByStockIdAndTimestamp(Long stockId, LocalDateTime timestamp);
 
     // 상위 n개 ohlcv 조회 (1D)
     @Query("SELECT s FROM StockOhlcv s WHERE s.stock.id = :stockId ORDER BY s.timestamp DESC")
@@ -36,4 +35,7 @@ public interface StockOhlcvRepository extends JpaRepository<StockOhlcv, Long> {
                 ORDER BY (o.close * o.volume) DESC
             """)
     List<StockOhlcv> findTopByTimestamp(@Param("latest") LocalDateTime latest, Pageable pageable);
+
+    // 기간별 조회 (정렬 포함)
+    List<StockOhlcv> findByStockIdAndTimestampBetweenOrderByTimestampAsc(Long stockId, LocalDateTime start, LocalDateTime end);
 }

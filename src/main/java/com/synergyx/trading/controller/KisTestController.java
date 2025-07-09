@@ -2,6 +2,7 @@ package com.synergyx.trading.controller;
 
 import com.synergyx.trading.apiPayload.ApiResponse;
 import com.synergyx.trading.service.kisService.*;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,7 +23,10 @@ public class KisTestController {
     private final KisPsrUpdateService kisPsrUpdateService;
     private final KisDividendScheduleService kisDividendScheduleService;
     private final KisOhlcvUpdateService kisOhlcvUpdateService;
+    private final Kis1dOhlcvUpdateService kis1dOhlcvUpdateService;
+    private final Kis1mOhlcvUpdateService kis1mOhlcvUpdateService;
 
+    @Hidden
     @Operation(summary = "KIS Access Token API", description = "KIS의 Access Token 을 발급 또는 로드합니다.")
     @GetMapping("/token")
     public ResponseEntity<String> getAccessTokenForTest() {
@@ -143,7 +147,7 @@ public class KisTestController {
     }
 
     @Operation(summary = "전체 Ohlcv 업데이트 API", description = "Ohlcv 값을 가져옵니다.")
-    @PostMapping("/stocks/ohlcv")
+//    @PostMapping("/stocks/ohlcv/15M") // 스케줄링 적용됨.
     public ResponseEntity<?> updateOhlcv() {
         try {
             kisOhlcvUpdateService.updateOhlcvAll();
@@ -156,13 +160,79 @@ public class KisTestController {
     }
 
     @Operation(summary = "개별 종목 Ohlcv 업데이트 API", description = "개별 종목의 Ohlcv 값을 가져옵니다.")
-    @PostMapping("/stocks/{symbol}/ohlcv")
+//    @PostMapping("/stocks/{symbol}/ohlcv/15M")
     public ResponseEntity<?> updateOhlcvBySymbol(
             @Parameter(description = "종목 코드", required = true)
             @PathVariable String symbol) {
         try {
             kisOhlcvUpdateService.updateOhlcvBySymbol(symbol);
             return ResponseEntity.ok(ApiResponse.onSuccess("STOCK_UPDATE_SUCCESS", "Ohlcv 저장 완료"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
+        }
+    }
+
+    @Operation(summary = "전체 3M Ohlcv 업데이트 API", description = "3M Ohlcv 값을 가져옵니다.")
+//    @PostMapping("/stocks/ohlcv/3M") // todo: 데이터 이어서 수집해야 함
+    public ResponseEntity<?> update3mOhlcv() {
+        try {
+            kis1dOhlcvUpdateService.updateOhlcvAll();
+            return ResponseEntity.ok(ApiResponse.onSuccess("STOCK_UPDATE_SUCCESS", "3m Ohlcv 저장 완료"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
+        }
+    }
+
+    @Operation(summary = "종목 구간 3M Ohlcv 업데이트 API", description = "startId ~ endId 사이 종목들의 3개월 OHLCV를 업데이트합니다.")
+//    @PostMapping("/stocks/ohlcv/3M/range")
+    public ResponseEntity<?> update3mOhlcvByStockIdRange(
+            @Parameter(description = "시작 종목 ID", required = true)
+            @RequestParam Long startId,
+
+            @Parameter(description = "종료 종목 ID (옵션)")
+            @RequestParam(required = false) Long endId
+    ) {
+        try {
+            kis1dOhlcvUpdateService.updateOhlcvByStockIdRange(startId, endId);
+
+            return ResponseEntity.ok(ApiResponse.onSuccess("STOCK_UPDATE_SUCCESS", "3m Ohlcv 저장 완료"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
+        }
+    }
+
+    @Operation(summary = "전체 5Y Ohlcv 업데이트 API", description = "5Y Ohlcv 값을 가져옵니다.")
+//    @PostMapping("/stocks/ohlcv/5Y")
+    public ResponseEntity<?> update5yOhlcv() {
+        try {
+            kis1mOhlcvUpdateService.updateOhlcvAll();
+            return ResponseEntity.ok(ApiResponse.onSuccess("STOCK_UPDATE_SUCCESS", "3m Ohlcv 저장 완료"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.onFailure("INTERNAL_ERROR", "저장 중 오류 발생", e.getMessage()));
+        }
+    }
+
+    @Operation(summary = "종목 구간 5Y Ohlcv 업데이트 API", description = "startId ~ endId 사이 종목들의 5년 OHLCV를 업데이트합니다.")
+//    @PostMapping("/stocks/ohlcv/5Y/range")
+    public ResponseEntity<?> update5yOhlcvByStockIdRange(
+            @Parameter(description = "시작 종목 ID", required = true)
+            @RequestParam Long startId,
+
+            @Parameter(description = "종료 종목 ID (옵션)")
+            @RequestParam(required = false) Long endId
+    ) {
+        try {
+            kis1mOhlcvUpdateService.updateOhlcvByStockIdRange(startId, endId);
+
+            return ResponseEntity.ok(ApiResponse.onSuccess("STOCK_UPDATE_SUCCESS", "3m Ohlcv 저장 완료"));
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)

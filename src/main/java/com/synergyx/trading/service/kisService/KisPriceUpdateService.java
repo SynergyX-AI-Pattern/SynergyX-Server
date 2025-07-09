@@ -29,6 +29,8 @@ public class KisPriceUpdateService {
     private final StockDetailRepository stockDetailRepository;
     private final ObjectMapper objectMapper;
 
+    private static final int REQUEST_INTERVAL_MILLIS = 400;
+
     /**
      * 시가총액/현재가/등락폭/등락률 + PER/PBR 을 업데이트합니다.
      */
@@ -45,7 +47,7 @@ public class KisPriceUpdateService {
 
                 stockDetailRepository.save(detail);
                 log.info("[KIS] {} 종목 {}됨", stock.getSymbol(), isNew ? "신규 등록" : "업데이트");
-                Thread.sleep(10_000); // API 호출 제한
+                Thread.sleep(REQUEST_INTERVAL_MILLIS); // API 호출 제한
 
             } catch (Exception e) {
                 log.error("[KIS] Failed to update stock detail for {}: {}", stock.getSymbol(), e.getMessage(), e);

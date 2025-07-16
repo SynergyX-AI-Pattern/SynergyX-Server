@@ -32,7 +32,7 @@ public class PatternController {
     @Operation(summary = "패턴 생성",
             description = """
                 사용자의 종목 패턴을 생성합니다.<br>
-                지원하는 패턴 단위: `HOUR` / `DAY`<br>
+                지원하는 패턴 단위: `HOUR`(1-23) / `DAY`(1-30)<br>
                 총 기간이 1일이 넘어야 합니다.
                 """
     )

@@ -34,7 +34,7 @@ public class PatternCommandServiceImpl implements PatternCommandService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
         // 패턴 유효성 검사
-        if (!PatternValidator.isValidDuration(dto.getPeriodUnit(), dto.getPeriodValue(), dto.getPoints().size())) {
+        if (!PatternValidator.isValidDuration(PeriodUnit.valueOf(dto.getPeriodUnit()), dto.getPeriodValue(), dto.getPoints().size())) {
             throw new GeneralException(ErrorStatus.INVALID_PATTERN_DURATION);
         }
 
@@ -70,7 +70,7 @@ public class PatternCommandServiceImpl implements PatternCommandService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_NOT_FOUND));
 
         // 패턴 유효성 검사
-        if (!PatternValidator.isValidDuration(dto.getPeriodUnit(), dto.getPeriodValue(), dto.getPoints().size())) {
+        if (!PatternValidator.isValidDuration(PeriodUnit.valueOf(dto.getPeriodUnit()), dto.getPeriodValue(), dto.getPoints().size())) {
             throw new GeneralException(ErrorStatus.INVALID_PATTERN_DURATION);
         }
 

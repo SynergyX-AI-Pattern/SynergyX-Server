@@ -13,6 +13,7 @@ import com.synergyx.trading.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.synergyx.trading.util.PatternValidator;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,11 @@ public class PatternCommandServiceImpl implements PatternCommandService {
         // 사용자 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        // 패턴 유효성 검사
+        if (!PatternValidator.isValidDuration(PeriodUnit.valueOf(dto.getPeriodUnit()), dto.getPeriodValue(), dto.getPoints().size())) {
+            throw new GeneralException(ErrorStatus.INVALID_PATTERN_DURATION);
+        }
 
         Pattern pattern = Pattern.builder()
                 .patternName(dto.getPatternName())
@@ -59,10 +65,14 @@ public class PatternCommandServiceImpl implements PatternCommandService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
-
         // 패턴 조회
         Pattern pattern = patternRepository.findById(patternId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_NOT_FOUND));
+
+        // 패턴 유효성 검사
+        if (!PatternValidator.isValidDuration(PeriodUnit.valueOf(dto.getPeriodUnit()), dto.getPeriodValue(), dto.getPoints().size())) {
+            throw new GeneralException(ErrorStatus.INVALID_PATTERN_DURATION);
+        }
 
         pattern.setPatternName(dto.getPatternName());
         pattern.setPoints(dto.getPoints());

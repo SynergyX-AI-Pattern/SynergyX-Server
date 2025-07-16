@@ -7,7 +7,7 @@ package com.synergyx.trading.util;
 public class PatternValidator {
 
     /**
-     * 총 기간이 1일((1440분) 이상인지 검사합니다.
+     * 총 기간이 1일(1440분) 이상인지 검사합니다.
      *
      * @param unit   단위
      * @param value  값

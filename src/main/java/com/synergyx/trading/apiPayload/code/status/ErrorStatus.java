@@ -29,6 +29,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 패턴 관련 예외 처리
     PATTERN_NOT_FOUND(HttpStatus.NOT_FOUND, "PATTERN404", "패턴이 존재하지 않습니다."),
+    INVALID_PATTERN_DURATION(HttpStatus.BAD_REQUEST, "PATTERN4001", "유효하지 않은 패턴 기간입니다."),
 
     // 패턴 적용 관련 예외 처리
     PATTERN_APPLY_NOT_FOUND(HttpStatus.NOT_FOUND, "PATTERN_APPLY404", "해당 패턴 적용 정보가 존재하지 않습니다."),

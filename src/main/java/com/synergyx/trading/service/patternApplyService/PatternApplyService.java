@@ -8,5 +8,5 @@ public interface PatternApplyService {
     PatternApplyResponseDTO.PatternApplyResultDTO applyPattern(Long userId, PatternApplyRequestDTO.PatternApplyDTO request);
 
     // 패턴 알림 토글
-    PatternApplyResponseDTO.PatternApplyResultDTO toggleNotification(Long userId, Long patternApplyId);
+    PatternApplyResponseDTO.PatternApplyToggleDTO toggleNotification(Long userId, Long patternApplyId);
 }

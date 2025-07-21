@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class PatternApplyServiceImpl implements PatternApplyService {
@@ -42,11 +44,16 @@ public class PatternApplyServiceImpl implements PatternApplyService {
         Stock stock = stockRepository.findById(request.getStockId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus.STOCK_NOT_FOUND));
 
+        LocalDateTime detectFrom = request.getDetectFrom() != null
+               ? request.getDetectFrom()
+                : LocalDateTime.now();  // 감지 시작일이 null이면 현재 시간으로 대체
+
         PatternApply apply = PatternApply.builder()
                 .pattern(pattern)
                 .stock(stock)
                 .user(user)
                 .isAlertEnabled(false)
+                .detectFrom(detectFrom)
                 .build();
 
         PatternApply saved = patternApplyRepository.save(apply);
@@ -54,13 +61,14 @@ public class PatternApplyServiceImpl implements PatternApplyService {
         return PatternApplyResponseDTO.PatternApplyResultDTO.builder()
                 .patternApplyId(saved.getId())
                 .isAlertEnabled(saved.getIsAlertEnabled())
+                .detectFrom(saved.getDetectFrom())
                 .build();
     }
 
     // 패턴 알림 토글
     @Override
     @Transactional
-    public PatternApplyResponseDTO.PatternApplyResultDTO toggleNotification(Long userId, Long patternApplyId) {
+    public PatternApplyResponseDTO.PatternApplyToggleDTO toggleNotification(Long userId, Long patternApplyId) {
 
         // 사용자 조회
         User user = userRepository.findById(userId)
@@ -73,7 +81,7 @@ public class PatternApplyServiceImpl implements PatternApplyService {
         patternApply.setIsAlertEnabled(!patternApply.getIsAlertEnabled());
         PatternApply updated = patternApplyRepository.save(patternApply);
 
-        return PatternApplyResponseDTO.PatternApplyResultDTO.builder()
+        return PatternApplyResponseDTO.PatternApplyToggleDTO.builder()
                 .patternApplyId(updated.getId())
                 .isAlertEnabled(updated.getIsAlertEnabled())
                 .build();

@@ -4,6 +4,8 @@ import com.synergyx.trading.model.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -38,5 +40,8 @@ public class PatternApply extends BaseEntity {
     @Column(name = "is_alert_enabled", nullable = false)
     private Boolean isAlertEnabled;
 
+    // 감지 시작일
+    @Column(name = "detect_from", nullable = false)
+    private LocalDateTime detectFrom;
 }
 

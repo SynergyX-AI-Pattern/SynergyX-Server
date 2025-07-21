@@ -25,14 +25,7 @@ public class BacktestController {
     private final BacktestService backtestService;
 
     // 백테스트 실행
-    @Operation(
-            summary = "백테스팅 실행",
-            description = """
-                백테스팅을 실행합니다.<br>
-                지원하는 패턴 단위: `MINUTE` / `HOUR` / `DAY`<br>
-                ⚠️ 단위가 `MINUTE`일 경우 `15의 배수 값`만 허용됩니다.
-                """
-    )
+    @Operation(summary = "백테스팅 실행", description = "백테스팅을 실행합니다.")
     @PostMapping
     public ResponseEntity<?> runBacktest(
             @RequestParam Long patternId,

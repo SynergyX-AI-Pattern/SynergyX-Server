@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 public class PatternApplyResponseDTO {
     @Getter
     @Builder
@@ -23,6 +25,16 @@ public class PatternApplyResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class PatternApplyResultDTO {
+        private Long patternApplyId;
+        private Boolean isAlertEnabled;
+        private LocalDateTime detectFrom;
+    }
+    // 알림 토글
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PatternApplyToggleDTO  {
         private Long patternApplyId;
         private Boolean isAlertEnabled;
     }

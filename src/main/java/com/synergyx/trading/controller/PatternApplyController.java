@@ -41,7 +41,7 @@ public class PatternApplyController {
     @PatchMapping("/{patternApplyId}/notification")
     public ResponseEntity<?>toggleNotification(
             @PathVariable Long patternApplyId) {
-        PatternApplyResponseDTO.PatternApplyResultDTO response =
+        PatternApplyResponseDTO.PatternApplyToggleDTO response =
                 patternApplyService.toggleNotification(TEMP_USER_ID, patternApplyId);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 response,

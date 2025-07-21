@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 public class PatternApplyRequestDTO {
     @Getter
     @Builder
@@ -14,6 +16,7 @@ public class PatternApplyRequestDTO {
     public static class PatternApplyDTO {
         private Long patternId; // 패턴 아이디
         private Long stockId; // 종목 아이디
+        private LocalDateTime detectFrom; // 감지 시작일
     }
 }
 

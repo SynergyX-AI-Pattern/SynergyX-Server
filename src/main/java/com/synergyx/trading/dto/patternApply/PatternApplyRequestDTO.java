@@ -16,7 +16,7 @@ public class PatternApplyRequestDTO {
     public static class PatternApplyDTO {
         private Long patternId; // 패턴 아이디
         private Long stockId; // 종목 아이디
-        private LocalDateTime detectFrom; // 감지 시작일
+        private LocalDateTime entryDate; // 진입 시점 (감지 시작일)
     }
 }
 

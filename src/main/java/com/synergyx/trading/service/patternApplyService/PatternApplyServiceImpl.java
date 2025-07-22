@@ -4,15 +4,10 @@ import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
 import com.synergyx.trading.apiPayload.exception.GeneralException;
 import com.synergyx.trading.dto.patternApply.PatternApplyRequestDTO;
 import com.synergyx.trading.dto.patternApply.PatternApplyResponseDTO;
-import com.synergyx.trading.model.Pattern;
-import com.synergyx.trading.model.PatternApply;
-import com.synergyx.trading.model.Stock;
-import com.synergyx.trading.model.User;
-import com.synergyx.trading.repository.PatternApplyRepository;
-import com.synergyx.trading.repository.PatternRepository;
-import com.synergyx.trading.repository.StockRepository;
-import com.synergyx.trading.repository.UserRepository;
+import com.synergyx.trading.model.*;
+import com.synergyx.trading.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +21,7 @@ public class PatternApplyServiceImpl implements PatternApplyService {
     private final PatternApplyRepository patternApplyRepository;
     private final UserRepository userRepository;
     private final StockRepository stockRepository;
+    private final StockOhlcvRepository stockOhlcvRepository;
 
     // 패턴 적용
     @Override
@@ -44,16 +40,26 @@ public class PatternApplyServiceImpl implements PatternApplyService {
         Stock stock = stockRepository.findById(request.getStockId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus.STOCK_NOT_FOUND));
 
-        LocalDateTime detectFrom = request.getDetectFrom() != null
-               ? request.getDetectFrom()
+        LocalDateTime entryDate = request.getEntryDate() != null
+               ? request.getEntryDate()
                 : LocalDateTime.now();  // 감지 시작일이 null이면 현재 시간으로 대체
+
+        // 매수 가격 조회
+        StockOhlcv latestOhlcv = stockOhlcvRepository
+                .findTopByStockIdAndTimestampBefore(request.getStockId(), entryDate, PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new GeneralException(ErrorStatus.CANDLE_DATA_NOT_FOUND));
+
+        Double entryPrice = latestOhlcv.getClose();
 
         PatternApply apply = PatternApply.builder()
                 .pattern(pattern)
                 .stock(stock)
                 .user(user)
                 .isAlertEnabled(false)
-                .detectFrom(detectFrom)
+                .entryDate(entryDate)
+                .entryPrice(entryPrice)
                 .build();
 
         PatternApply saved = patternApplyRepository.save(apply);
@@ -61,7 +67,8 @@ public class PatternApplyServiceImpl implements PatternApplyService {
         return PatternApplyResponseDTO.PatternApplyResultDTO.builder()
                 .patternApplyId(saved.getId())
                 .isAlertEnabled(saved.getIsAlertEnabled())
-                .detectFrom(saved.getDetectFrom())
+                .entryDate(saved.getEntryDate())
+                .entryPrice(saved.getEntryPrice())
                 .build();
     }
 
@@ -71,8 +78,8 @@ public class PatternApplyServiceImpl implements PatternApplyService {
     public PatternApplyResponseDTO.PatternApplyToggleDTO toggleNotification(Long userId, Long patternApplyId) {
 
         // 사용자 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
         // 패턴 적용 정보 조회
         PatternApply patternApply = patternApplyRepository.findById(patternApplyId)

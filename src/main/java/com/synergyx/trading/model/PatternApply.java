@@ -40,8 +40,12 @@ public class PatternApply extends BaseEntity {
     @Column(name = "is_alert_enabled", nullable = false)
     private Boolean isAlertEnabled;
 
-    // 감지 시작일
-    @Column(name = "detect_from", nullable = false)
-    private LocalDateTime detectFrom;
+    // 진입 시점 (감지 시작일)
+    @Column(name = "entry_date", nullable = false)
+    private LocalDateTime entryDate;
+
+    // 진입 당시 가격
+    @Column(name = "entry_price", nullable = false)
+    private Double entryPrice;
 }
 

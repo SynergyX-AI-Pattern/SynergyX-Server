@@ -18,5 +18,13 @@ public class PatternApplyRequestDTO {
         private Long stockId; // 종목 아이디
         private LocalDateTime entryAt; // 진입 시점 (감지 시작일)
     }
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    // 패턴 적용 정보 수정
+    public static class PatternApplyUpdateDTO {
+        private LocalDateTime entryAt; // 진입 시점
+    }
 }
 

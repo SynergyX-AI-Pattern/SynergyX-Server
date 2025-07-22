@@ -50,5 +50,28 @@ public class PatternApplyController {
         ));
     }
 
+    // 패턴 적용 정보 수정
+    @Operation(summary = "패턴 적용 정보 수정", description = "패턴 적용 정보를 수정합니다.")
+    @PatchMapping("/{patternApplyId}")
+    public ResponseEntity<?> updatePatternApply(
+            @PathVariable Long patternApplyId,
+            @RequestBody PatternApplyRequestDTO.PatternApplyUpdateDTO request) {
+                patternApplyService.updatePatternApply(TEMP_USER_ID, patternApplyId, request);
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+                SuccessStatus.SUCCESS_PATTERN_APPLY_UPDATE.getCode(),
+                SuccessStatus.SUCCESS_PATTERN_APPLY_UPDATE.getMessage()
+        ));
+    }
+
+    // 패턴 적용 해제
+    @Operation(summary = "패턴 적용 해제", description = "종목에 적용된 패턴을 해제합니다.")
+    @DeleteMapping("/{patternApplyId}")
+    public ResponseEntity<?> deletePatternApply(@PathVariable Long patternApplyId) {
+        patternApplyService.deletePatternApply(TEMP_USER_ID, patternApplyId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+                SuccessStatus.SUCCESS_PATTERN_APPLY_UNLINK.getCode(),
+                SuccessStatus.SUCCESS_PATTERN_APPLY_UNLINK.getMessage()
+        ));
+    }
 }
 

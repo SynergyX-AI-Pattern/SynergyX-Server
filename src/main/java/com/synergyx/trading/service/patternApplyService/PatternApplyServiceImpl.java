@@ -43,6 +43,11 @@ public class PatternApplyServiceImpl implements PatternApplyService {
                ? request.getEntryAt()
                 : LocalDateTime.now();  // 감지 시작일이 null이면 현재 시간으로 대체
 
+        // 감지 시작일이 미래일 경우 예외 처리
+        if (entryAt.isAfter(LocalDateTime.now())) {
+            throw new GeneralException(ErrorStatus.INVALID_ENTRY_AT);
+        }
+
         // 매수 가격 조회
         StockOhlcv latestOhlcv = stockOhlcvRepository
                 .findTop1ByStockIdAndTimestampLessThanEqualOrderByTimestampDesc(request.getStockId(), entryAt)
@@ -90,4 +95,46 @@ public class PatternApplyServiceImpl implements PatternApplyService {
                 .isAlertEnabled(updated.getIsAlertEnabled())
                 .build();
     }
+
+    // 패턴 적용 정보 수정
+    @Override
+    @Transactional
+    public void updatePatternApply(Long userId, Long patternApplyId, PatternApplyRequestDTO.PatternApplyUpdateDTO request) {
+
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        // 패턴 적용 정보 조회
+        PatternApply patternApply = patternApplyRepository.findById(patternApplyId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_APPLY_NOT_FOUND));
+
+        // 감지 시작일이 미래일 경우 예외 처리
+        if (request.getEntryAt().isAfter(LocalDateTime.now())) {
+            throw new GeneralException(ErrorStatus.INVALID_ENTRY_AT);
+        }
+
+        if (request.getEntryAt() != null) {
+            patternApply.setEntryAt(request.getEntryAt());
+        }
+
+        patternApplyRepository.save(patternApply);
+    }
+
+    // 패턴 적용 해제
+    @Override
+    @Transactional
+    public void deletePatternApply(Long userId, Long patternApplyId) {
+
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        // 패턴 적용 정보 조회
+        PatternApply patternApply = patternApplyRepository.findById(patternApplyId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_APPLY_NOT_FOUND));
+
+        patternApplyRepository.delete(patternApply);
+    }
+
 }

@@ -23,8 +23,12 @@ public enum SuccessStatus implements BaseCode {
     SUCCESS_PATTERN_CREATE(HttpStatus.OK, "PATTERN200", "패턴이 생성되었습니다."),
     SUCCESS_PATTERN_DELETE(HttpStatus.OK, "PATTERN200", "패턴이 삭제되었습니다."),
     SUCCESS_PATTERN_UPDATE(HttpStatus.OK, "PATTERN200", "패턴이 수정되었습니다."),
+
+    // 패턴-종목 적용
     SUCCESS_PATTERN_APPLY(HttpStatus.OK, "PATTERN200", "패턴이 적용되었습니다."),
     SUCCESS_PATTERN_NOTIFICATION_TOGGLE(HttpStatus.OK, "PATTERN200", "패턴 알림 설정이 변경되었습니다."),
+    SUCCESS_PATTERN_APPLY_UPDATE(HttpStatus.OK, "PATTERN200", "패턴 적용 정보가 수정되었습니다."),
+    SUCCESS_PATTERN_APPLY_UNLINK(HttpStatus.OK, "PATTERN200", "패턴 적용이 해제되었습니다."),
 
     // 백테스팅
     SUCCESS_BACKTEST_EXECUTE(HttpStatus.OK, "BACKTEST200", "백테스트가 실행되었습니다."),

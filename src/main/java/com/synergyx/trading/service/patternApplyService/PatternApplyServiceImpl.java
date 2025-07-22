@@ -109,15 +109,22 @@ public class PatternApplyServiceImpl implements PatternApplyService {
         PatternApply patternApply = patternApplyRepository.findById(patternApplyId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_APPLY_NOT_FOUND));
 
-        // 감지 시작일이 미래일 경우 예외 처리
-        if (request.getEntryAt().isAfter(LocalDateTime.now())) {
-            throw new GeneralException(ErrorStatus.INVALID_ENTRY_AT);
-        }
-
-        if (request.getEntryAt() != null) {
+        // 감지 시작일 유효성 검증
+        LocalDateTime newEntryAt = request.getEntryAt();
+        if (newEntryAt != null) {
+            // 감지 시작일이 미래일 경우 예외 처리
+            if (request.getEntryAt().isAfter(LocalDateTime.now())) {
+                throw new GeneralException(ErrorStatus.INVALID_ENTRY_AT);
+            }
             patternApply.setEntryAt(request.getEntryAt());
-        }
 
+            // entryAt 변경 시 해당 시점의 가격도 업데이트
+            StockOhlcv latestOhlcv = stockOhlcvRepository
+                    .findTop1ByStockIdAndTimestampLessThanEqualOrderByTimestampDesc(patternApply.getStock().getId(), newEntryAt)
+                    .orElseThrow(() -> new GeneralException(ErrorStatus.CANDLE_DATA_NOT_FOUND));
+
+            patternApply.setEntryPrice(latestOhlcv.getClose());
+        }
         patternApplyRepository.save(patternApply);
     }
 

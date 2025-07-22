@@ -41,8 +41,8 @@ public class PatternApply extends BaseEntity {
     private Boolean isAlertEnabled;
 
     // 진입 시점 (감지 시작일)
-    @Column(name = "entry_date", nullable = false)
-    private LocalDateTime entryDate;
+    @Column(name = "entry_at", nullable = false)
+    private LocalDateTime entryAt;
 
     // 진입 당시 가격
     @Column(name = "entry_price", nullable = false)

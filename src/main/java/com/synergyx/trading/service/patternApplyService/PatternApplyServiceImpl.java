@@ -7,7 +7,6 @@ import com.synergyx.trading.dto.patternApply.PatternApplyResponseDTO;
 import com.synergyx.trading.model.*;
 import com.synergyx.trading.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,9 +45,7 @@ public class PatternApplyServiceImpl implements PatternApplyService {
 
         // 매수 가격 조회
         StockOhlcv latestOhlcv = stockOhlcvRepository
-                .findTopByStockIdAndTimestampBefore(request.getStockId(), entryDate, PageRequest.of(0, 1))
-                .stream()
-                .findFirst()
+                .findTop1ByStockIdAndTimestampLessThanEqualOrderByTimestampDesc(request.getStockId(), entryDate)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.CANDLE_DATA_NOT_FOUND));
 
         Double entryPrice = latestOhlcv.getClose();

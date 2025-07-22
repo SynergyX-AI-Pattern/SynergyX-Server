@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StockOhlcvRepository extends JpaRepository<StockOhlcv, Long> {
@@ -40,11 +41,6 @@ public interface StockOhlcvRepository extends JpaRepository<StockOhlcv, Long> {
     List<StockOhlcv> findByStockIdAndTimestampBetweenOrderByTimestampAsc(Long stockId, LocalDateTime start, LocalDateTime end);
 
     // entryDate (포함) 이전의 가장 최근의 종가 조회
-    @Query("""
-                SELECT o FROM StockOhlcv o
-                WHERE o.stock.id = :stockId
-                AND o.timestamp <= :entryDate
-                ORDER BY o.timestamp DESC
-            """)
-    List<StockOhlcv> findTopByStockIdAndTimestampBefore(@Param("stockId") Long stockId, @Param("entryDate") LocalDateTime entryDate, Pageable pageable);
+    Optional<StockOhlcv> findTop1ByStockIdAndTimestampLessThanEqualOrderByTimestampDesc(Long stockId, LocalDateTime entryDate);
+
 }

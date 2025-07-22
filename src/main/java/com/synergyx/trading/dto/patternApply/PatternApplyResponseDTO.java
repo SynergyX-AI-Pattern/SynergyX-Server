@@ -27,7 +27,7 @@ public class PatternApplyResponseDTO {
     public static class PatternApplyResultDTO {
         private Long patternApplyId;
         private Boolean isAlertEnabled;
-        private LocalDateTime entryDate;
+        private LocalDateTime entryAt;
         private Double entryPrice;
     }
     // 알림 토글

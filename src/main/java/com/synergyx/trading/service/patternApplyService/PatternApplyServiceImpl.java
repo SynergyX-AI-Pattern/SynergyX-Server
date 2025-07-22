@@ -79,13 +79,14 @@ public class PatternApplyServiceImpl implements PatternApplyService {
     @Transactional
     public PatternApplyResponseDTO.PatternApplyToggleDTO toggleNotification(Long userId, Long patternApplyId) {
 
-        // 사용자 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-
         // 패턴 적용 정보 조회
         PatternApply patternApply = patternApplyRepository.findById(patternApplyId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_APPLY_NOT_FOUND));
+
+        // 사용자 권한 확인
+        if (!patternApply.getUser().getId().equals(userId)) {
+            throw new GeneralException(ErrorStatus._FORBIDDEN);
+        }
 
         patternApply.setIsAlertEnabled(!patternApply.getIsAlertEnabled());
         PatternApply updated = patternApplyRepository.save(patternApply);
@@ -101,13 +102,14 @@ public class PatternApplyServiceImpl implements PatternApplyService {
     @Transactional
     public void updatePatternApply(Long userId, Long patternApplyId, PatternApplyRequestDTO.PatternApplyUpdateDTO request) {
 
-        // 사용자 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-
         // 패턴 적용 정보 조회
         PatternApply patternApply = patternApplyRepository.findById(patternApplyId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_APPLY_NOT_FOUND));
+
+        // 사용자 권한 확인
+        if (!patternApply.getUser().getId().equals(userId)) {
+            throw new GeneralException(ErrorStatus._FORBIDDEN);
+        }
 
         // 감지 시작일 유효성 검증
         LocalDateTime newEntryAt = request.getEntryAt();
@@ -133,13 +135,14 @@ public class PatternApplyServiceImpl implements PatternApplyService {
     @Transactional
     public void deletePatternApply(Long userId, Long patternApplyId) {
 
-        // 사용자 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-
         // 패턴 적용 정보 조회
         PatternApply patternApply = patternApplyRepository.findById(patternApplyId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_APPLY_NOT_FOUND));
+
+        // 사용자 권한 확인
+        if (!patternApply.getUser().getId().equals(userId)) {
+            throw new GeneralException(ErrorStatus._FORBIDDEN);
+        }
 
         patternApplyRepository.delete(patternApply);
     }

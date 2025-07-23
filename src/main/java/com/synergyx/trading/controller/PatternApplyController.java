@@ -4,7 +4,8 @@ import com.synergyx.trading.apiPayload.ApiResponse;
 import com.synergyx.trading.apiPayload.code.status.SuccessStatus;
 import com.synergyx.trading.dto.patternApply.PatternApplyRequestDTO;
 import com.synergyx.trading.dto.patternApply.PatternApplyResponseDTO;
-import com.synergyx.trading.service.patternApplyService.PatternApplyService;
+import com.synergyx.trading.service.patternApplyService.PatternApplyCommandService;
+import com.synergyx.trading.service.patternApplyService.PatternApplyQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,8 @@ public class PatternApplyController {
     // 임시 userId
     private static final Long TEMP_USER_ID = 1L;
 
-    private final PatternApplyService patternApplyService;
+    private final PatternApplyCommandService patternApplyCommandService;
+    private final PatternApplyQueryService patternApplyQueryService;
 
     // 패턴 적용
     @Operation(summary = "패턴 적용", description = "패턴을 종목에 적용합니다.")
@@ -28,7 +30,7 @@ public class PatternApplyController {
     public ResponseEntity<?> applyPattern(
             @RequestBody PatternApplyRequestDTO.PatternApplyDTO request) {
         PatternApplyResponseDTO.PatternApplyResultDTO response =
-                patternApplyService.applyPattern(TEMP_USER_ID, request);
+                patternApplyCommandService.applyPattern(TEMP_USER_ID, request);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 response,
                 SuccessStatus.SUCCESS_PATTERN_APPLY.getCode(),
@@ -42,7 +44,7 @@ public class PatternApplyController {
     public ResponseEntity<?>toggleNotification(
             @PathVariable Long patternApplyId) {
         PatternApplyResponseDTO.PatternApplyToggleDTO response =
-                patternApplyService.toggleNotification(TEMP_USER_ID, patternApplyId);
+                patternApplyCommandService.toggleNotification(TEMP_USER_ID, patternApplyId);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 response,
                 SuccessStatus.SUCCESS_PATTERN_NOTIFICATION_TOGGLE.getCode(),
@@ -56,7 +58,7 @@ public class PatternApplyController {
     public ResponseEntity<?> updatePatternApply(
             @PathVariable Long patternApplyId,
             @RequestBody PatternApplyRequestDTO.PatternApplyUpdateDTO request) {
-                patternApplyService.updatePatternApply(TEMP_USER_ID, patternApplyId, request);
+                patternApplyCommandService.updatePatternApply(TEMP_USER_ID, patternApplyId, request);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 SuccessStatus.SUCCESS_PATTERN_APPLY_UPDATE.getCode(),
                 SuccessStatus.SUCCESS_PATTERN_APPLY_UPDATE.getMessage()
@@ -67,11 +69,27 @@ public class PatternApplyController {
     @Operation(summary = "패턴 적용 해제", description = "종목에 적용된 패턴을 해제합니다.")
     @DeleteMapping("/{patternApplyId}")
     public ResponseEntity<?> deletePatternApply(@PathVariable Long patternApplyId) {
-        patternApplyService.deletePatternApply(TEMP_USER_ID, patternApplyId);
+        patternApplyCommandService.deletePatternApply(TEMP_USER_ID, patternApplyId);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 SuccessStatus.SUCCESS_PATTERN_APPLY_UNLINK.getCode(),
                 SuccessStatus.SUCCESS_PATTERN_APPLY_UNLINK.getMessage()
         ));
     }
+
+    // 종목-패턴 상세 조회
+    @Operation(summary = "종목-패턴 상세 조회", description = "특정 종목에 적용된 패턴과 관련된 상세 정보를 조회합니다.")
+    @GetMapping("/stocks/{stockId}")
+    public ResponseEntity<?> getPatternApplyDetailByStockId(
+            @PathVariable Long stockId
+    ) {
+        PatternApplyResponseDTO.PatternApplyDetailDTO response =
+                patternApplyQueryService.getPatternApplyDetail(TEMP_USER_ID, stockId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+                response,
+                SuccessStatus.SUCCESS_PATTERN_APPLY_DETAIL.getCode(),
+                SuccessStatus.SUCCESS_PATTERN_APPLY_DETAIL.getMessage()
+        ));
+    }
+
 }
 

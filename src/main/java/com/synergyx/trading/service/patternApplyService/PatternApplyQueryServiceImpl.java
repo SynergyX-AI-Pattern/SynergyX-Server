@@ -33,12 +33,10 @@ public class PatternApplyQueryServiceImpl implements PatternApplyQueryService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_APPLY_NOT_FOUND));
 
         // 종목 조회
-        Stock stock = stockRepository.findById(stockId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.STOCK_NOT_FOUND));
+        Stock stock = patternApply.getStock();
 
         // 패턴 조회
-        Pattern pattern = patternRepository.findById(patternApply.getPattern().getId())
-                .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_NOT_FOUND));
+        Pattern pattern = patternApply.getPattern();
 
         // 최근 백테스트 1건
         Backtest backtest = backtestRepository

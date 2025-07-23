@@ -8,6 +8,8 @@ import com.synergyx.trading.service.patternApplyService.PatternApplyCommandServi
 import com.synergyx.trading.service.patternApplyService.PatternApplyQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +44,7 @@ public class PatternApplyController {
     @Operation(summary = "패턴 알림 토글", description = "패턴 알림을 토글합니다.")
     @PatchMapping("/{patternApplyId}/notification")
     public ResponseEntity<?>toggleNotification(
-            @PathVariable Long patternApplyId) {
+            @PathVariable @Valid @Positive Long patternApplyId) {
         PatternApplyResponseDTO.PatternApplyToggleDTO response =
                 patternApplyCommandService.toggleNotification(TEMP_USER_ID, patternApplyId);
         return ResponseEntity.ok(ApiResponse.onSuccess(

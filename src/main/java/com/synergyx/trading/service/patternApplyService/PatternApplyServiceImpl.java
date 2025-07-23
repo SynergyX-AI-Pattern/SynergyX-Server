@@ -43,6 +43,11 @@ public class PatternApplyServiceImpl implements PatternApplyService {
                ? request.getEntryAt()
                 : LocalDateTime.now();  // 감지 시작일이 null이면 현재 시간으로 대체
 
+        // 감지 시작일이 미래일 경우 예외 처리
+        if (entryAt.isAfter(LocalDateTime.now())) {
+            throw new GeneralException(ErrorStatus.INVALID_ENTRY_AT);
+        }
+
         // 매수 가격 조회
         StockOhlcv latestOhlcv = stockOhlcvRepository
                 .findTop1ByStockIdAndTimestampLessThanEqualOrderByTimestampDesc(request.getStockId(), entryAt)
@@ -74,13 +79,14 @@ public class PatternApplyServiceImpl implements PatternApplyService {
     @Transactional
     public PatternApplyResponseDTO.PatternApplyToggleDTO toggleNotification(Long userId, Long patternApplyId) {
 
-        // 사용자 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-
         // 패턴 적용 정보 조회
         PatternApply patternApply = patternApplyRepository.findById(patternApplyId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_APPLY_NOT_FOUND));
+
+        // 사용자 권한 확인
+        if (!patternApply.getUser().getId().equals(userId)) {
+            throw new GeneralException(ErrorStatus._FORBIDDEN);
+        }
 
         patternApply.setIsAlertEnabled(!patternApply.getIsAlertEnabled());
         PatternApply updated = patternApplyRepository.save(patternApply);
@@ -90,4 +96,55 @@ public class PatternApplyServiceImpl implements PatternApplyService {
                 .isAlertEnabled(updated.getIsAlertEnabled())
                 .build();
     }
+
+    // 패턴 적용 정보 수정
+    @Override
+    @Transactional
+    public void updatePatternApply(Long userId, Long patternApplyId, PatternApplyRequestDTO.PatternApplyUpdateDTO request) {
+
+        // 패턴 적용 정보 조회
+        PatternApply patternApply = patternApplyRepository.findById(patternApplyId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_APPLY_NOT_FOUND));
+
+        // 사용자 권한 확인
+        if (!patternApply.getUser().getId().equals(userId)) {
+            throw new GeneralException(ErrorStatus._FORBIDDEN);
+        }
+
+        // 감지 시작일 유효성 검증
+        LocalDateTime newEntryAt = request.getEntryAt();
+        if (newEntryAt != null) {
+            // 감지 시작일이 미래일 경우 예외 처리
+            if (request.getEntryAt().isAfter(LocalDateTime.now())) {
+                throw new GeneralException(ErrorStatus.INVALID_ENTRY_AT);
+            }
+            patternApply.setEntryAt(request.getEntryAt());
+
+            // entryAt 변경 시 해당 시점의 가격도 업데이트
+            StockOhlcv latestOhlcv = stockOhlcvRepository
+                    .findTop1ByStockIdAndTimestampLessThanEqualOrderByTimestampDesc(patternApply.getStock().getId(), newEntryAt)
+                    .orElseThrow(() -> new GeneralException(ErrorStatus.CANDLE_DATA_NOT_FOUND));
+
+            patternApply.setEntryPrice(latestOhlcv.getClose());
+        }
+        patternApplyRepository.save(patternApply);
+    }
+
+    // 패턴 적용 해제
+    @Override
+    @Transactional
+    public void deletePatternApply(Long userId, Long patternApplyId) {
+
+        // 패턴 적용 정보 조회
+        PatternApply patternApply = patternApplyRepository.findById(patternApplyId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.PATTERN_APPLY_NOT_FOUND));
+
+        // 사용자 권한 확인
+        if (!patternApply.getUser().getId().equals(userId)) {
+            throw new GeneralException(ErrorStatus._FORBIDDEN);
+        }
+
+        patternApplyRepository.delete(patternApply);
+    }
+
 }

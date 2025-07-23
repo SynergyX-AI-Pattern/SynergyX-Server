@@ -33,6 +33,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 패턴 적용 관련 예외 처리
     PATTERN_APPLY_NOT_FOUND(HttpStatus.NOT_FOUND, "PATTERN_APPLY404", "해당 패턴 적용 정보가 존재하지 않습니다."),
+    INVALID_ENTRY_AT(HttpStatus.BAD_REQUEST, "PATTERN_APPLY400", "감지 시작일은 현재보다 미래일 수 없습니다."),
 
     // 백테스팅 관련 예외 처리
     BACKTEST_NOT_FOUND(HttpStatus.NOT_FOUND, "BACKTEST404", "해당 백테스트 결과가 존재하지 않습니다."),

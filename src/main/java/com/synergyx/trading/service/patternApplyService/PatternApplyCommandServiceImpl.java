@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class PatternApplyServiceImpl implements PatternApplyService {
+public class PatternApplyCommandServiceImpl implements PatternApplyCommandService {
 
     private final PatternRepository patternRepository;
     private final PatternApplyRepository patternApplyRepository;

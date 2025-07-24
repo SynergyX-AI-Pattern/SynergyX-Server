@@ -3,7 +3,7 @@ package com.synergyx.trading.service.patternApplyService;
 import com.synergyx.trading.dto.patternApply.PatternApplyRequestDTO;
 import com.synergyx.trading.dto.patternApply.PatternApplyResponseDTO;
 
-public interface PatternApplyService {
+public interface PatternApplyCommandService {
     // 패턴 적용
     PatternApplyResponseDTO.PatternApplyResultDTO applyPattern(Long userId, PatternApplyRequestDTO.PatternApplyDTO request);
 

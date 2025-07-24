@@ -6,7 +6,13 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "backtest")
+@Table(
+        name = "backtest",
+        indexes = @Index(
+                name = "idx_pattern_stock_user_exec",
+                columnList = "pattern_id, stock_id, user_id, executed_at"
+        )
+)
 @Getter
 @Setter
 @Builder

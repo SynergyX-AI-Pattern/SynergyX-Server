@@ -47,5 +47,9 @@ public class PatternApply extends BaseEntity {
     // 진입 당시 가격
     @Column(name = "entry_price", nullable = false)
     private Double entryPrice;
+
+    // 최소 수익률 조건 (유효성 검증용)
+    @Column(name = "min_valid_return", nullable = false)
+    private Double minValidReturn;
 }
 

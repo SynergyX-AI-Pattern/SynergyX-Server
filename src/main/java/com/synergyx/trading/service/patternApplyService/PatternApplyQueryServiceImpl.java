@@ -13,11 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PatternApplyQueryServiceImpl implements PatternApplyQueryService {
 
-    private final PatternRepository patternRepository;
     private final PatternApplyRepository patternApplyRepository;
     private final UserRepository userRepository;
     private final BacktestRepository backtestRepository;
-    private final StockRepository stockRepository;
 
     // 종목-패턴 상세 조회
     @Override

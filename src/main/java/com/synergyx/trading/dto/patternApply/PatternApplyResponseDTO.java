@@ -31,6 +31,7 @@ public class PatternApplyResponseDTO {
         private Boolean isAlertEnabled;
         private LocalDateTime entryAt;
         private Double entryPrice;
+        private Double minValidReturn;
     }
     // 알림 토글
     @Getter

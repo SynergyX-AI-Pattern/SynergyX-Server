@@ -55,6 +55,14 @@ public class PatternApplyCommandServiceImpl implements PatternApplyCommandServic
 
         Double entryPrice = latestOhlcv.getClose();
 
+        // 최소 수익률 조건
+        Double minValidReturn = request.getMinValidReturn() != null ? request.getMinValidReturn() : 0.0;
+
+        // 최소 수익률 0 미만이면 예외 처리
+        if (minValidReturn < 0) {
+            throw new GeneralException(ErrorStatus.INVALID_MIN_VALID_RETURN);
+        }
+
         PatternApply apply = PatternApply.builder()
                 .pattern(pattern)
                 .stock(stock)
@@ -62,6 +70,7 @@ public class PatternApplyCommandServiceImpl implements PatternApplyCommandServic
                 .isAlertEnabled(false)
                 .entryAt(entryAt)
                 .entryPrice(entryPrice)
+                .minValidReturn(minValidReturn)
                 .build();
 
         PatternApply saved = patternApplyRepository.save(apply);
@@ -71,6 +80,7 @@ public class PatternApplyCommandServiceImpl implements PatternApplyCommandServic
                 .isAlertEnabled(saved.getIsAlertEnabled())
                 .entryAt(saved.getEntryAt())
                 .entryPrice(saved.getEntryPrice())
+                .minValidReturn(minValidReturn)
                 .build();
     }
 
@@ -127,6 +137,15 @@ public class PatternApplyCommandServiceImpl implements PatternApplyCommandServic
 
             patternApply.setEntryPrice(latestOhlcv.getClose());
         }
+
+        // 최소 수익률 조건 유효성 검사
+        if (request.getMinValidReturn() != null) {
+            if (request.getMinValidReturn() < 0) {
+                throw new GeneralException(ErrorStatus.INVALID_MIN_VALID_RETURN);
+            }
+            patternApply.setMinValidReturn(request.getMinValidReturn());
+        }
+
         patternApplyRepository.save(patternApply);
     }
 

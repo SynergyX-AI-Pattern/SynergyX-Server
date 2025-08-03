@@ -4,6 +4,7 @@ import com.synergyx.trading.model.StockOhlcv1d;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface StockOhlcv1dRepository extends JpaRepository<StockOhlcv1d, Long> {
@@ -13,4 +14,7 @@ public interface StockOhlcv1dRepository extends JpaRepository<StockOhlcv1d, Long
 
     // 중복 확인
     boolean existsByStockIdAndTimestamp(Long stockId, LocalDateTime timestamp);
+
+    // 상위 63개 ohlcv 조회 (약 3개월)
+    List<StockOhlcv1d> findTop63ByStockIdOrderByTimestampDesc(Long stockId);
 }

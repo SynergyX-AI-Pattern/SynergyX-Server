@@ -1,6 +1,7 @@
 package com.synergyx.trading.model;
 
 import com.synergyx.trading.model.common.BaseEntity;
+import com.synergyx.trading.model.common.Ohlcv;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StockOhlcv1d extends BaseEntity {
+public class StockOhlcv1d extends BaseEntity implements Ohlcv {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

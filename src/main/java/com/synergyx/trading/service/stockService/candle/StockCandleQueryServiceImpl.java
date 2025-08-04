@@ -33,11 +33,7 @@ public class StockCandleQueryServiceImpl implements StockCandleQueryService {
     @Transactional(readOnly = true)
     public List<StockCandleResponseDTO> getCandles(Long stockId, String intervalStr) {
 
-        // todo: 3m, 1y, 5y 데이터 연동 전까지는 1w로 대체. 추후 삭제
-        String effectiveInterval = switch (intervalStr.toUpperCase()) {
-            case "3M", "1Y", "5Y" -> "1W";
-            default -> intervalStr;
-        };
+        String effectiveInterval = intervalStr.toUpperCase();
 
         CandleInterval interval = CandleInterval.fromCode(effectiveInterval);
 

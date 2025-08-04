@@ -1,5 +1,8 @@
 package com.synergyx.trading.enums;
 
+import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
+import com.synergyx.trading.apiPayload.exception.GeneralException;
+
 import java.time.LocalDateTime;
 
 public enum CandleInterval {
@@ -53,6 +56,6 @@ public enum CandleInterval {
                 return interval;
             }
         }
-        throw new IllegalArgumentException("지원하지 않는 interval입니다: " + code);
+        throw new GeneralException(ErrorStatus.INVALID_CANDLE_INTERVAL);
     }
 }

@@ -175,7 +175,7 @@ public class KisTestController {
     }
 
     @Operation(summary = "전체 3M Ohlcv 업데이트 API", description = "3M Ohlcv 값을 가져옵니다.")
-//    @PostMapping("/stocks/ohlcv/3M") // todo: 데이터 이어서 수집해야 함
+//    @PostMapping("/stocks/ohlcv/3M")
     public ResponseEntity<?> update3mOhlcv() {
         try {
             kis1dOhlcvUpdateService.updateOhlcvAll();

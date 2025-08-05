@@ -50,6 +50,10 @@ public enum ErrorStatus implements BaseErrorCode {
     FCM_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "NOTIFICATION400", "FCM 토큰이 존재하지 않아 알림을 전송할 수 없습니다."),
     INVALID_NOTIFICATION_TYPE(HttpStatus.BAD_REQUEST, "NOTIFICATION4001", "유효하지 않은 알림 타입입니다."),
 
+    // 감정 투자 일기 관련 예외 처리
+    INVALID_CONTENT(HttpStatus.BAD_REQUEST, "DIARY400", "일기 내용이 비어있습니다."),
+    FASTAPI_ANALYSIS_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "DIARY502", "FastAPI 감정 분석 서버 호출에 실패했습니다."),
+
     ;
 
     private final HttpStatus httpStatus;

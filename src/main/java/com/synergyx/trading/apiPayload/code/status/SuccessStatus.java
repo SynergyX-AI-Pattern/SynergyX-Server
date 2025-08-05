@@ -45,6 +45,9 @@ public enum SuccessStatus implements BaseCode {
     // 사용자
     SUCCESS_FCM_TOKEN_UPDATED(HttpStatus.OK, "FCM200", "FCM 토큰이 성공적으로 저장되었습니다."),
 
+    // 감정 투자 일기
+    SUCCESS_WRITE_EMOTION_DIARY(HttpStatus.OK, "DIARY200", "감정 투자 일기 작성 성공"),
+
     ;
 
     private final HttpStatus httpStatus;

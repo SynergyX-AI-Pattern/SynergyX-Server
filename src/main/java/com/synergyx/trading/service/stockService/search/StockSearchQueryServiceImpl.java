@@ -1,8 +1,8 @@
 package com.synergyx.trading.service.stockService.search;
 
-//import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
-//import com.synergyx.trading.apiPayload.exception.GeneralException;
 //import com.synergyx.trading.dto.stockSearch.StockSearchFastApiWrapperDTO;
+import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
+import com.synergyx.trading.apiPayload.exception.GeneralException;
 import com.synergyx.trading.dto.stockSearch.StockSearchResponseDTO;
 import com.synergyx.trading.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +46,22 @@ public class StockSearchQueryServiceImpl implements StockSearchQueryService {
      */
     @Override
     public StockSearchResponseDTO searchStockByImage(MultipartFile image) {
+        // 파일 검증
+        if (image.isEmpty()) {
+            throw new GeneralException(ErrorStatus.IMAGE_FILE_MISSING);
+        }
+
+        // 파일 크기 검증 (5MB 제한)
+        if (image.getSize() > 5 * 1024 * 1024) {
+            throw new GeneralException(ErrorStatus.IMAGE_FILE_TOO_LARGE);
+        }
+
+        // 파일 타입 검증
+        String contentType = image.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new GeneralException(ErrorStatus.INVALID_IMAGE_FILE_TYPE);
+        }
+
         // TODO: FastAPI 연결 후 주석 삭제
 //        try {
 //            MultipartBodyBuilder builder = new MultipartBodyBuilder();

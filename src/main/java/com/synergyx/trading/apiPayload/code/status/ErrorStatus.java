@@ -26,6 +26,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // 종목 관련 예외 처리
     STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "STOCK404", "해당 종목을 찾을 수 없습니다."),
     STOCK_DETAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "STOCK_DETAIL404", "해당 종목 상세 정보를 찾을 수 없습니다."),
+    IMAGE_STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "STOCK_IMAGE404", "이미지로 종목을 찾을 수 없습니다."),
 
     // 패턴 관련 예외 처리
     PATTERN_NOT_FOUND(HttpStatus.NOT_FOUND, "PATTERN404", "패턴이 존재하지 않습니다."),

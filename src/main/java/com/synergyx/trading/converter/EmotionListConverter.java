@@ -27,7 +27,7 @@ public class EmotionListConverter implements AttributeConverter<List<String>, St
     @Override
     public List<String> convertToEntityAttribute(String dbData) {
         try {
-            return mapper.readValue(dbData, new TypeReference<List<String>>() {});
+            return mapper.readValue(dbData, new TypeReference<>() {});
         } catch (Exception e) {
             return new ArrayList<>();
         }

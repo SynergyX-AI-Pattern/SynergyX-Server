@@ -67,7 +67,6 @@ public class StockDetailQueryServiceImpl implements StockDetailQueryService {
                 .changeRate(stockDetail.getChangeRate() + "%")
                 .changeAmount(toFormattedNumber(stockDetail.getChangeAmount()))
                 .isWatchlist(isWatchlist)
-                .isTradeNotificationEnabled(false) // todo: delete
                 .prediction(predictUi)
                 .financials(financials)
                 .build();

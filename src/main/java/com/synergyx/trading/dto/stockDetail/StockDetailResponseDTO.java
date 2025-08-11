@@ -13,7 +13,6 @@ public class StockDetailResponseDTO {
     private String changeRate; // 1.12%
     private String changeAmount; // 600
     private Boolean isWatchlist;
-    private Boolean isTradeNotificationEnabled;
     private PredictionDTO prediction;
     private FinancialsDTO financials;
 

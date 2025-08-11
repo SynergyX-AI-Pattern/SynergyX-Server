@@ -13,10 +13,9 @@ public class PredictionWindowSummaryDTO {
     private Long stockId;
     private LocalDate asOfDate;
     private int windowDays;
-    private double upperForecast;
-    private double lowerForecast;
-    private double fairSell;
-    private double fairBuy;
+    private long upperForecast;
+    private long lowerForecast;
+    private long fairSell;
+    private long fairBuy;
     private double bufferPct;
-    private LocalDateTime expiresAt;
 }

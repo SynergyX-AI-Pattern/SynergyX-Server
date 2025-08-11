@@ -17,6 +17,7 @@ public interface PredictionRepository extends JpaRepository<Prediction, Long> {
                 FROM Prediction p
                 WHERE p.stock.id = :stockId
                   AND p.targetDate BETWEEN :startDate AND :endDate
+                GROUP BY p.stock.id
             """)
     Optional<PredictionWindowAggProjection> aggregateWindow(
             @Param("stockId") Long stockId,

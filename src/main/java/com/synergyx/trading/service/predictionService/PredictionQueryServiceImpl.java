@@ -36,7 +36,7 @@ public class PredictionQueryServiceImpl implements PredictionQueryService {
 
         // 예측 윈도우 계산
         LocalDate startDate = getNextBizDay(asOfDate);
-        LocalDate endDate = addBizDays(startDate, 13); // 시작일 포함 총 14영업일
+        LocalDate endDate = addBizDays(startDate, WINDOW_DAYS - 1); // 시작일 포함 총 14영업일
 
         log.debug("[PredictionQueryService] Prediction window startDate={}, endDate={}", startDate, endDate);
 
@@ -48,14 +48,39 @@ public class PredictionQueryServiceImpl implements PredictionQueryService {
                     return new GeneralException(ErrorStatus.STOCK_PREDICTION_NOT_FOUND);
                 });
 
-        double upper = agg.getUpperForecast();
-        double lower = agg.getLowerForecast();
+        long upper = Math.round(agg.getUpperForecast());
+        long lower = Math.round(agg.getLowerForecast());
 
         log.debug("[PredictionQueryService] Upper forecast={}, Lower forecast={}", upper, lower);
 
+        // 예측값 유효성 검사
+        if (!Double.isFinite(upper) || !Double.isFinite(lower)) {
+            log.warn("[PredictionQueryService] Invalid forecasts: upper={}, lower={}", upper, lower);
+            throw new GeneralException(ErrorStatus.STOCK_PREDICTION_NOT_FOUND);
+        }
+
+        // 상/하한 역전 방어
+        if (upper < lower) {
+            log.warn("[PredictionQueryService] upper < lower (upper={}, lower={}) - swapping", upper, lower);
+            long t = upper;
+            upper = lower;
+            lower = t;
+        }
+
         // 버퍼 적용 + 틱 단위 조정
-        double fairSell = roundDown(upper * (1 - BUFFER_PCT), tickFor(upper));
-        double fairBuy = roundUp(lower * (1 + BUFFER_PCT), tickFor(lower));
+        long bufferedUpper = Math.round(upper * (1 - BUFFER_PCT));
+        long bufferedLower = Math.round(lower * (1 + BUFFER_PCT));
+        long fairSell = roundDown(bufferedUpper, tickFor(bufferedUpper));
+        long fairBuy = roundUp(bufferedLower, tickFor(bufferedLower));
+
+        // 매도/매수 역전 방어
+        if (fairBuy > fairSell) {
+            log.warn("[PredictionQueryService] fairBuy({}) > fairSell({}) - adjusting to midpoint", fairBuy, fairSell);
+            long mid = Math.round((upper + lower) / 2.0);
+            long tick = tickFor(mid);
+            fairBuy = roundDown(mid, tick);
+            fairSell = roundUp(mid, tick);
+        }
 
         log.debug("[PredictionQueryService] Fair sell(after buffer/tick)={}, Fair buy(after buffer/tick)={}",
                 fairSell, fairBuy);
@@ -69,7 +94,6 @@ public class PredictionQueryServiceImpl implements PredictionQueryService {
                 .fairSell(fairSell)
                 .fairBuy(fairBuy)
                 .bufferPct(BUFFER_PCT)
-                .expiresAt(asOfDate.plusDays(1).atTime(9, 0))
                 .build();
 
         log.debug("[PredictionQueryService] Returning DTO={}", dto);
@@ -77,6 +101,9 @@ public class PredictionQueryServiceImpl implements PredictionQueryService {
         return dto;
     }
 
+    /**
+     * 다음 영업일 계산
+     */
     private LocalDate getNextBizDay(LocalDate date) {
         LocalDate next = date.plusDays(1);
         while (isWeekend(next)) {
@@ -85,6 +112,9 @@ public class PredictionQueryServiceImpl implements PredictionQueryService {
         return next;
     }
 
+    /**
+     * 영업일 기준 days일 뒤 날짜 계산
+     */
     private LocalDate addBizDays(LocalDate start, int days) {
         LocalDate date = start;
         int added = 0;
@@ -103,24 +133,30 @@ public class PredictionQueryServiceImpl implements PredictionQueryService {
     }
 
     /**
-     * 가격대에 맞는 호가 단위를 반환합니다.
+     * 가격대에 맞는 호가 단위를 반환합니다. (코스피 기준)
      * 구간별 최소 호가 단위 기준입니다.
      * <p>
-     * - 4,800원 → 1원 단위
-     * - 9,500원 → 5원 단위
-     * - 42,000원 → 10원 단위
-     * - 87,000원 → 50원 단위
-     * - 120,000원 → 100원 단위
+     * ex:
+     * - 1,500원  → 1원 단위
+     * - 3,000원  → 5원 단위
+     * - 8,000원  → 10원 단위
+     * - 15,000원 → 10원 단위
+     * - 42,000원 → 50원 단위
+     * - 87,000원 → 100원 단위
+     * - 350,000원 → 500원 단위
+     * - 600,000원 → 1,000원 단위
      *
      * @param price 적용할 가격
      * @return 호가 단위
      */
-    private double tickFor(double price) {
-        if (price < 5000) return 1;
-        if (price < 10000) return 5;
-        if (price < 50000) return 10;
-        if (price < 100000) return 50;
-        return 100;
+    private long tickFor(double price) {
+        if (price < 2000) return 1;
+        else if (price < 5000) return 5;
+        else if (price < 20000) return 10;
+        else if (price < 50000) return 50;
+        else if (price < 200000) return 100;
+        else if (price < 500000) return 500;
+        return 1000;
     }
 
     /**
@@ -130,14 +166,14 @@ public class PredictionQueryServiceImpl implements PredictionQueryService {
      * <p>
      * ex:
      * - value=62,622, tick=50 → 62,600
-     * - value=9,987, tick=5 → 9,985
+     * - value=9,987, tick=10 → 9,980
      *
      * @param value
      * @param tick
      * @return
      */
-    private double roundDown(double value, double tick) {
-        return Math.floor(value / tick) * tick;
+    private long roundDown(long value, long tick) {
+        return (value / tick) * tick;
     }
 
     /**
@@ -147,13 +183,13 @@ public class PredictionQueryServiceImpl implements PredictionQueryService {
      * <p>
      * ex:
      * - value=53,418, tick=100 → 53,500
-     * - value=9,987, tick=5 → 9,990
+     * - value=9,987, tick=10 → 9,990
      *
      * @param value
      * @param tick
      * @return
      */
-    private double roundUp(double value, double tick) {
-        return Math.ceil(value / tick) * tick;
+    private long roundUp(long value, long tick) {
+        return ((value + tick - 1) / tick) * tick;
     }
 }

@@ -2,6 +2,7 @@ package com.synergyx.trading.service.stockService.detail;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.synergyx.trading.dto.stockDetail.PredictionWindowSummaryDTO;
 import com.synergyx.trading.dto.stockDetail.StockDetailResponseDTO;
 import com.synergyx.trading.model.Stock;
 import com.synergyx.trading.model.StockDetail;
@@ -15,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 
 import static com.synergyx.trading.util.ParsingUtil.*;
 
@@ -51,10 +54,10 @@ public class StockDetailQueryServiceImpl implements StockDetailQueryService {
 
         boolean isWatchlist = interestStockRepository.existsByUserIdAndStockId(userId, stockId);
 
-        // todo: 아직 미구현 → false 고정
-        boolean isTradeNotificationEnabled = false;
-
-        StockDetailResponseDTO.PredictionDTO prediction = predictionQueryService.getPredictionByStockId(stock.getId());
+        // 예측 데이터
+        LocalDate asOfDate = LocalDate.now(); // 오늘의 날짜
+        PredictionWindowSummaryDTO prediction = predictionQueryService.getWindowSummary(stockId, asOfDate);
+        StockDetailResponseDTO.PredictionDTO predictUi = toUiPrediction(prediction);
 
         StockDetailResponseDTO.FinancialsDTO financials = parseFinancialData(stockDetail);
 
@@ -64,8 +67,8 @@ public class StockDetailQueryServiceImpl implements StockDetailQueryService {
                 .changeRate(stockDetail.getChangeRate() + "%")
                 .changeAmount(toFormattedNumber(stockDetail.getChangeAmount()))
                 .isWatchlist(isWatchlist)
-                .isTradeNotificationEnabled(isTradeNotificationEnabled)
-                .prediction(prediction)
+                .isTradeNotificationEnabled(false) // todo: delete
+                .prediction(predictUi)
                 .financials(financials)
                 .build();
     }
@@ -99,6 +102,22 @@ public class StockDetailQueryServiceImpl implements StockDetailQueryService {
             log.error("[DETAIL] 재무데이터 파싱 실패 - symbol Id: {}", stockDetail.getId(), e);
             throw new RuntimeException("재무데이터 파싱 실패", e);
         }
+    }
+
+    /**
+     * 예측 dto -> 예측 ui dto로 변환합니다.
+     *
+     * @param s
+     * @return
+     */
+    private StockDetailResponseDTO.PredictionDTO toUiPrediction(PredictionWindowSummaryDTO s) {
+        return StockDetailResponseDTO.PredictionDTO.builder()
+                .upperBound(toFormattedNumber(s.getUpperForecast()))
+                .lowerBound(toFormattedNumber(s.getLowerForecast()))
+                .buyPrice(toFormattedNumber(s.getFairBuy()))
+                .sellPrice(toFormattedNumber(s.getFairSell()))
+                .targetRange(s.getWindowDays() + "일 이내")
+                .build();
     }
 }
 

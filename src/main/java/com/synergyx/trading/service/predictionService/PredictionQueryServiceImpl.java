@@ -48,24 +48,27 @@ public class PredictionQueryServiceImpl implements PredictionQueryService {
                     return new GeneralException(ErrorStatus.STOCK_PREDICTION_NOT_FOUND);
                 });
 
-        long upper = Math.round(agg.getUpperForecast());
-        long lower = Math.round(agg.getLowerForecast());
-
-        log.debug("[PredictionQueryService] Upper forecast={}, Lower forecast={}", upper, lower);
+        double rawUpper = agg.getUpperForecast();
+        double rawLower = agg.getLowerForecast();
 
         // 예측값 유효성 검사
-        if (!Double.isFinite(upper) || !Double.isFinite(lower)) {
-            log.warn("[PredictionQueryService] Invalid forecasts: upper={}, lower={}", upper, lower);
+        if (!Double.isFinite(rawUpper) || !Double.isFinite(rawLower)) {
+            log.warn("[PredictionQueryService] Invalid forecasts: upper={}, lower={}", rawUpper, rawLower);
             throw new GeneralException(ErrorStatus.STOCK_PREDICTION_NOT_FOUND);
         }
 
         // 상/하한 역전 방어
-        if (upper < lower) {
-            log.warn("[PredictionQueryService] upper < lower (upper={}, lower={}) - swapping", upper, lower);
-            long t = upper;
-            upper = lower;
-            lower = t;
+        if (rawUpper < rawLower) {
+            log.warn("[PredictionQueryService] upper < lower (upper={}, lower={}) - swapping", rawUpper, rawLower);
+            double tmp = rawUpper;
+            rawUpper = rawLower;
+            rawLower = tmp;
         }
+
+        // 반올림 적용
+        long upper = Math.round(rawUpper);
+        long lower = Math.round(rawLower);
+        log.debug("[PredictionQueryService] Upper forecast={}, Lower forecast={}", upper, lower);
 
         // 버퍼 적용 + 틱 단위 조정
         long bufferedUpper = Math.round(upper * (1 - BUFFER_PCT));

@@ -1,7 +1,9 @@
 package com.synergyx.trading.service.predictionService;
 
-import com.synergyx.trading.dto.stockDetail.StockDetailResponseDTO;
+import com.synergyx.trading.dto.stockDetail.PredictionWindowSummaryDTO;
+
+import java.time.LocalDate;
 
 public interface PredictionQueryService {
-    StockDetailResponseDTO.PredictionDTO getPredictionByStockId(Long stockId);
+    PredictionWindowSummaryDTO getWindowSummary(Long stockId, LocalDate asOfDate);
 }

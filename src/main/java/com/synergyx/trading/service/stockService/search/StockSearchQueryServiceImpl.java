@@ -52,8 +52,8 @@ public class StockSearchQueryServiceImpl implements StockSearchQueryService {
             throw new GeneralException(ErrorStatus.IMAGE_FILE_MISSING);
         }
 
-        // 파일 크기 검증 (5MB 제한)
-        if (image.getSize() > 5 * 1024 * 1024) {
+        // 파일 크기 검증 (20MB 제한)
+        if (image.getSize() > 20 * 1024 * 1024) {
             throw new GeneralException(ErrorStatus.IMAGE_FILE_TOO_LARGE);
         }
 

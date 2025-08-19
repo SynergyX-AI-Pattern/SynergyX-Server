@@ -14,8 +14,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -83,5 +85,17 @@ public class StockController {
     public ResponseEntity<?> getAiTop20Stocks() {
         List<RankedStockDTO> list = stockRankingQueryService.getAiTop20();
         return ResponseEntity.ok(ApiResponse.onSuccess(list));
+    }
+
+    @Operation(summary = "이미지 기반 종목 검색", description = "상품 이미지를 기반으로 종목을 반환합니다.")
+    @PostMapping(value = "/search/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> searchStockByImage(
+            @Parameter(
+                    description = "업로드할 이미지 파일",
+                    required = true
+            )
+            @RequestParam("image") MultipartFile image) {
+        StockSearchResponseDTO result = stockSearchQueryService.searchStockByImage(image);
+        return ResponseEntity.ok(ApiResponse.onSuccess(result));
     }
 }

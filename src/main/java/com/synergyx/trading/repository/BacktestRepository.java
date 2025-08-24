@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -27,4 +29,7 @@ public interface BacktestRepository extends JpaRepository<Backtest, Long> {
             Long stockId,
             Long userId
     );
+
+    // 특정 패턴에 대한 최근 3개 백테스트 조회 (패턴 목록 조회용)
+    List<Backtest> findTop3ByPatternIdAndUserIdOrderByExecutedAtDescIdDesc(Long patternId, Long userId);
 }

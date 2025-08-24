@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,16 +29,31 @@ public class PatternQueryServiceImpl implements PatternQueryService {
     public List<PatternResponseDTO.PatternDTO> getPatternList(Long userId) {
 
         // 유저 존재 여부 확인
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        if (!userRepository.existsById(userId)) {
+            throw new GeneralException(ErrorStatus.USER_NOT_FOUND);
+        }
 
         return patternRepository.findByUserId(userId).stream()
-                .map(p -> new PatternResponseDTO.PatternDTO(
-                        p.getId(),
-                        p.getPatternName(),
-                        p.getPoints()
-                ))
-                .collect(Collectors.toList());
+                .map(pattern -> {
+                    // 최근 백테스트 결과 최대 3개 조회
+                    List<Backtest> backtests = backtestRepository.findTop3ByPatternIdAndUserIdOrderByExecutedAtDescIdDesc(pattern.getId(), userId);
+                    List<PatternResponseDTO.BacktestSummaryDTO> summaries = backtests.stream()
+                            .map(b -> PatternResponseDTO.BacktestSummaryDTO.builder()
+                                    .stockName(b.getStock().getName())
+                                    .averageReturn(b.getAverageReturn())
+                                    .winRate(b.getWinRate())
+                                    .matchedCount(b.getMatchedCount())
+                                    .executedAt(b.getExecutedAt())
+                                    .build())
+                            .toList();
+                    return PatternResponseDTO.PatternDTO.builder()
+                            .patternId(pattern.getId())
+                            .patternName(pattern.getPatternName())
+                            .points(pattern.getPoints())
+                            .recentBacktestResults(summaries)
+                            .build();
+                })
+                .toList();
     }
 
     // 패턴 상세 조회
@@ -48,8 +62,9 @@ public class PatternQueryServiceImpl implements PatternQueryService {
     public PatternResponseDTO.PatternDetailDTO getPatternDetail(Long userId, Long patternId) {
 
         // 유저 존재 여부 확인
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        if (!userRepository.existsById(userId)) {
+            throw new GeneralException(ErrorStatus.USER_NOT_FOUND);
+        }
 
         // 패턴 존재 여부 확인
         Pattern pattern = patternRepository.findById(patternId)

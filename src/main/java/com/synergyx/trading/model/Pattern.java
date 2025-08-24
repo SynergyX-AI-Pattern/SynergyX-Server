@@ -26,7 +26,7 @@ public class Pattern extends BaseEntity {
     private User user;
 
     // 적용된 종목 목록
-    @OneToMany(mappedBy = "pattern")
+    @OneToMany(mappedBy = "pattern", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<PatternApply> patternApplies;
 
     @Column(name = "pattern_name", nullable = false)

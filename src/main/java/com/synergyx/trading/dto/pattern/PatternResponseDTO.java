@@ -18,6 +18,19 @@ public class PatternResponseDTO {
         private Long patternId; // 패턴 아이디
         private String patternName; // 패턴 이름
         private List<Double> points; // 좌표
+        private List<BacktestSummaryDTO> recentBacktestResults; // 최근 백테스트 결과
+    }
+    // 최근 백테스트 결과 (목록 조회용)
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class BacktestSummaryDTO {
+        private String stockName; // 종목 이름
+        private Double averageReturn; // 평균 수익률
+        private Double winRate; // 승률
+        private Integer matchedCount; // 패턴 매칭 횟수
+        private LocalDate executedAt; // 백테스팅 실행 날짜
     }
     // 패턴 상세 조회
     @Getter

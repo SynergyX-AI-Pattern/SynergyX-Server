@@ -55,4 +55,21 @@ public class EmotionDiaryCommandServiceImpl implements  EmotionDiaryCommandServi
                 .build();
     }
 
+    // 감정 투자 일기 삭제
+    @Override
+    @Transactional
+    public void deleteDiary(Long userId, Long diaryId) {
+
+        // 감정 투자 일기 정보 확인
+        EmotionDiary diary = emotionDiaryRepository.findById(diaryId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.DIARY_NOT_FOUND));
+
+        // 사용자 권한 확인
+        if (!diary.getUser().getId().equals(userId)) {
+            throw new GeneralException(ErrorStatus._FORBIDDEN);
+        }
+
+        emotionDiaryRepository.delete(diary);
+    }
+
 }

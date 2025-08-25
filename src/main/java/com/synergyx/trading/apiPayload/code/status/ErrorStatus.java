@@ -56,12 +56,12 @@ public enum ErrorStatus implements BaseErrorCode {
     // 감정 투자 일기 관련 예외 처리
     INVALID_CONTENT(HttpStatus.BAD_REQUEST, "DIARY400", "일기 내용이 비어있습니다."),
     FASTAPI_ANALYSIS_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "DIARY502", "FastAPI 감정 분석 서버 호출에 실패했습니다."),
+    DIARY_NOT_FOUND(HttpStatus.NOT_FOUND, "DIARY404", "해당 일기를 찾을 수 없습니다."),
 
     // 이미지 관련 예외 처리
     IMAGE_FILE_MISSING(HttpStatus.BAD_REQUEST, "IMAGE4001", "업로드된 이미지가 없습니다."),
     IMAGE_FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "IMAGE4002", "업로드 가능한 최대 용량은 5MB입니다."),
     INVALID_IMAGE_FILE_TYPE(HttpStatus.BAD_REQUEST, "IMAGE4003", "지원하지 않는 이미지 형식입니다."),
-
     ;
 
     private final HttpStatus httpStatus;

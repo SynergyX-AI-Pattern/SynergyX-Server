@@ -7,6 +7,7 @@ import com.synergyx.trading.dto.emotionDiary.EmotionDiaryResponseDTO;
 import com.synergyx.trading.service.emotionDiaryService.EmotionDiaryCommandService;
 import com.synergyx.trading.service.emotionDiaryService.EmotionDiaryQueryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,19 @@ public class EmotionDiaryController {
     public ResponseEntity<?> getEmotionDiaryList() {
         List<EmotionDiaryResponseDTO.EmotionDiaryDTO> result = emotionDiaryQueryService.getEmotionDiaryList(TEMP_USER_ID);
         return ResponseEntity.ok(ApiResponse.onSuccess(result));
+    }
+
+    // 감정 투자 일기 삭제
+    @Operation(summary = "감정 투자 일기 삭제", description = "감정 투자 일기를 삭제합니다.")
+    @DeleteMapping("/{diaryId}")
+    public ResponseEntity<?> deleteDiary(
+            @Parameter
+            @PathVariable Long diaryId) {
+        emotionDiaryCommandService.deleteDiary(TEMP_USER_ID, diaryId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+                SuccessStatus.SUCCESS_DELETE_EMOTION_DIARY.getCode(),
+                SuccessStatus.SUCCESS_DELETE_EMOTION_DIARY.getMessage()
+        ));
     }
 
 }

@@ -1,9 +1,11 @@
 package com.synergyx.trading.model;
 
+import com.synergyx.trading.enums.PeriodUnit;
 import com.synergyx.trading.model.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(
@@ -77,4 +79,14 @@ public class Backtest extends BaseEntity {
 
     @Column(nullable = false)
     private Double lastMatchedReturn; // 마지막 패턴 발생시 수익률
+
+    @Column(name = "highlight_from_date")
+    private LocalDateTime highlightFromDate; // 최대 수익률 발생 시 매칭 시작일
+
+    @Column(name = "highlight_to_date")
+    private LocalDateTime highlightToDate; // 최대 수익률 발생 시 매칭 종료일
+
+    @Column(name = "period_unit", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PeriodUnit periodUnit; // 기간 단위
 }

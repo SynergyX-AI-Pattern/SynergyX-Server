@@ -94,6 +94,7 @@ public class PatternQueryServiceImpl implements PatternQueryService {
 
         List<PatternResponseDTO.AppliedStockDTO> appliedStocks = applyList.stream()
                 .map(apply -> PatternResponseDTO.AppliedStockDTO.builder()
+                        .stockId(apply.getStock().getId())
                         .symbol(apply.getStock().getSymbol())
                         .stockName(apply.getStock().getName())
                         .stockImage(apply.getStock().getImageUrl())

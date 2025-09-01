@@ -73,6 +73,7 @@ public class PatternResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AppliedStockDTO {
+        private Long stockId; // 종목 아이디
         private String symbol; // 종목 코드
         private String stockName; // 종목 이름
         private String stockImage; // 종목 이미지

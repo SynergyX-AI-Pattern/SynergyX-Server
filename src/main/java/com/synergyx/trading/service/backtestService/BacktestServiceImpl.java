@@ -129,7 +129,7 @@ public class BacktestServiceImpl implements BacktestService {
         }
 
         // 백테스팅 조회
-        Backtest backtest = backtestRepository.findById(backtestId)
+        Backtest backtest = backtestRepository.findByIdAndUserId(backtestId, userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.BACKTEST_NOT_FOUND));
 
         return BacktestResponseDTO.BacktestResultDetailDTO.builder()
@@ -150,10 +150,12 @@ public class BacktestServiceImpl implements BacktestService {
                 .lastMatchedReturn(backtest.getLastMatchedReturn())
                 .totalReturn(backtest.getTotalReturn())
                 .highlightRange(
-                        BacktestResponseDTO.HighlightRangeDTO.builder()
+                        (backtest.getHighlightFromDate() != null && backtest.getHighlightToDate() != null)
+                                ? BacktestResponseDTO.HighlightRangeDTO.builder()
                                 .fromDate(backtest.getHighlightFromDate())
                                 .toDate(backtest.getHighlightToDate())
                                 .build()
+                                : null
                 )
                 .periodUnit(backtest.getPeriodUnit())
                 .build();

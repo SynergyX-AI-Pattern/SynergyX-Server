@@ -1,7 +1,9 @@
 package com.synergyx.trading.controller;
 
 import com.synergyx.trading.apiPayload.ApiResponse;
+import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
 import com.synergyx.trading.apiPayload.code.status.SuccessStatus;
+import com.synergyx.trading.apiPayload.exception.GeneralException;
 import com.synergyx.trading.dto.backtest.BacktestRequestDTO;
 import com.synergyx.trading.dto.backtest.BacktestResponseDTO;
 import com.synergyx.trading.service.backtestService.BacktestService;
@@ -82,6 +84,10 @@ public class BacktestController {
             )
             @RequestParam(defaultValue = "20") int margin
     ) {
+        // 마진 입력값 검증
+        if (margin < 0 || margin > 100) {
+            throw new GeneralException(ErrorStatus._BAD_REQUEST);
+        }
         var candles = backtestService.getBacktestResultCandles(backtestId, TEMP_USER_ID, margin);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(

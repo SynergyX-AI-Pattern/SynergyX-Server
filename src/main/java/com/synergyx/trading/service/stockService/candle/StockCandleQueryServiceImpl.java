@@ -112,10 +112,11 @@ public class StockCandleQueryServiceImpl implements StockCandleQueryService {
             throw new GeneralException(ErrorStatus.CANDLE_DATA_NOT_FOUND);
         }
 
+
         // 15분봉 -> 1시간봉 리샘플링
         Map<LocalDateTime, List<StockOhlcv>> grouped = candles15m.stream()
                 .collect(Collectors.groupingBy(
-                        c -> c.getTimestamp().withMinute(0).withSecond(0).withNano(0),
+                        c -> c.getTimestamp().truncatedTo(java.time.temporal.ChronoUnit.HOURS),
                         TreeMap::new,
                         Collectors.toList()
                 ));
@@ -123,6 +124,7 @@ public class StockCandleQueryServiceImpl implements StockCandleQueryService {
         return grouped.entrySet().stream()
                 .map(entry -> {
                     List<StockOhlcv> group = entry.getValue();
+                    group.sort(java.util.Comparator.comparing(StockOhlcv::getTimestamp));
                     return StockCandleResponseDTO.builder()
                             .time(entry.getKey())
                             .open(group.get(0).getOpen())

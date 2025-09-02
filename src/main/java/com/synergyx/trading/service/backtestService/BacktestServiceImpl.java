@@ -107,10 +107,12 @@ public class BacktestServiceImpl implements BacktestService {
                 .lastMatchedDate(saved.getLastMatchedDate())
                 .lastMatchedReturn(saved.getLastMatchedReturn())
                 .highlightRange(
-                        BacktestResponseDTO.HighlightRangeDTO.builder()
+                        (saved.getHighlightFromDate() != null && saved.getHighlightToDate() != null)
+                                ? BacktestResponseDTO.HighlightRangeDTO.builder()
                                 .fromDate(saved.getHighlightFromDate())
                                 .toDate(saved.getHighlightToDate())
                                 .build()
+                                : null
                 )
                 .periodUnit(saved.getPeriodUnit())
                 .build();

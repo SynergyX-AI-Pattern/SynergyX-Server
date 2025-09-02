@@ -5,15 +5,19 @@ import com.synergyx.trading.apiPayload.exception.GeneralException;
 import com.synergyx.trading.converter.StockCandleConverter;
 import com.synergyx.trading.dto.stockDetail.StockCandleResponseDTO;
 import com.synergyx.trading.enums.CandleInterval;
+import com.synergyx.trading.model.StockOhlcv;
 import com.synergyx.trading.repository.StockOhlcv1dRepository;
-import com.synergyx.trading.repository.StockOhlcv1hRepository;
+import com.synergyx.trading.repository.StockOhlcvRepository;
 import com.synergyx.trading.service.stockService.candle.strategy.CandleCompressionStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import java.util.TreeMap;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,8 +53,8 @@ public class StockCandleQueryServiceImpl implements StockCandleQueryService {
                 .compress(stockId);
     }
 
+    private final StockOhlcvRepository stockOhlcvRepository;
     private final StockOhlcv1dRepository stockOhlcv1dRepository;
-    private final StockOhlcv1hRepository stockOhlcv1hRepository;
     private final StockCandleConverter stockCandleConverter;
 
     /**
@@ -100,13 +104,34 @@ public class StockCandleQueryServiceImpl implements StockCandleQueryService {
             throw new GeneralException(ErrorStatus._BAD_REQUEST);
         }
 
-        var candles = stockOhlcv1hRepository
+        // 15분봉 데이터 조회
+        var candles15m = stockOhlcvRepository
                 .findByStockIdAndTimestampBetweenOrderByTimestampAsc(stockId, startDate, endDate);
 
-        if (candles == null || candles.isEmpty()) {
+        if (candles15m == null || candles15m.isEmpty()) {
             throw new GeneralException(ErrorStatus.CANDLE_DATA_NOT_FOUND);
         }
 
-        return stockCandleConverter.toDtoList(candles);
+        // 15분봉 -> 1시간봉 리샘플링
+        Map<LocalDateTime, List<StockOhlcv>> grouped = candles15m.stream()
+                .collect(Collectors.groupingBy(
+                        c -> c.getTimestamp().withMinute(0).withSecond(0).withNano(0),
+                        TreeMap::new,
+                        Collectors.toList()
+                ));
+
+        return grouped.entrySet().stream()
+                .map(entry -> {
+                    List<StockOhlcv> group = entry.getValue();
+                    return StockCandleResponseDTO.builder()
+                            .time(entry.getKey())
+                            .open(group.get(0).getOpen())
+                            .high(group.stream().mapToDouble(StockOhlcv::getHigh).max().orElse(0))
+                            .low(group.stream().mapToDouble(StockOhlcv::getLow).min().orElse(0))
+                            .close(group.get(group.size() - 1).getClose())
+                            .volume(group.stream().mapToLong(StockOhlcv::getVolume).sum())
+                            .build();
+                })
+                .toList();
     }
 }

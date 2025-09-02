@@ -17,4 +17,11 @@ public interface StockOhlcv1dRepository extends JpaRepository<StockOhlcv1d, Long
 
     // 상위 63개 ohlcv 조회 (약 3개월)
     List<StockOhlcv1d> findTop63ByStockIdOrderByTimestampDesc(Long stockId);
+
+    // 기간별 일봉 조회 (오름차순 정렬)
+    List<StockOhlcv1d> findByStockIdAndTimestampBetweenOrderByTimestampAsc(
+            Long stockId,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
 }

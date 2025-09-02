@@ -1,10 +1,12 @@
 package com.synergyx.trading.dto.backtest;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.synergyx.trading.enums.PeriodUnit;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class BacktestResponseDTO  {
@@ -46,7 +48,20 @@ public class BacktestResponseDTO  {
         private Double totalReturn; // 모든 매칭 결과 누적 수익률
         private LocalDate lastMatchedDate; // 마지막 패턴 발생일
         private Double lastMatchedReturn; // 마지막 패턴 발생시 수익률
+        private HighlightRangeDTO highlightRange; // 최대 수익률 하이라이트 범위
+        private PeriodUnit periodUnit; // 단위
     }
+
+    // 백테스팅 최대 수익률 하이라이트 부분
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HighlightRangeDTO  {
+        private LocalDateTime fromDate;
+        private LocalDateTime toDate;
+    }
+
     // 백테스팅 결과 상세 조회
     @Getter
     @Builder
@@ -69,6 +84,8 @@ public class BacktestResponseDTO  {
         private Double totalReturn; // 모든 매칭 결과 누적 수익률
         private LocalDate lastMatchedDate; // 마지막 패턴 발생일
         private Double lastMatchedReturn; // 마지막 패턴 발생시 수익률
+        private HighlightRangeDTO highlightRange; // 최대 수익률 하이라이트 범위
+        private PeriodUnit periodUnit; // 단위
     }
 
     // 백테스팅 결과 목록 조회용 content
@@ -106,5 +123,4 @@ public class BacktestResponseDTO  {
             private int totalPages; // 전체 페이지 수
         }
     }
-
 }

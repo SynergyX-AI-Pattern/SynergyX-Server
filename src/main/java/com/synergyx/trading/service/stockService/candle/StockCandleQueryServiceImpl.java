@@ -2,12 +2,17 @@ package com.synergyx.trading.service.stockService.candle;
 
 import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
 import com.synergyx.trading.apiPayload.exception.GeneralException;
+import com.synergyx.trading.converter.StockCandleConverter;
 import com.synergyx.trading.dto.stockDetail.StockCandleResponseDTO;
 import com.synergyx.trading.enums.CandleInterval;
+import com.synergyx.trading.repository.StockOhlcv1dRepository;
+import com.synergyx.trading.repository.StockOhlcv1hRepository;
 import com.synergyx.trading.service.stockService.candle.strategy.CandleCompressionStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -43,5 +48,65 @@ public class StockCandleQueryServiceImpl implements StockCandleQueryService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus.INVALID_CANDLE_INTERVAL))
                 .compress(stockId);
     }
-}
 
+    private final StockOhlcv1dRepository stockOhlcv1dRepository;
+    private final StockOhlcv1hRepository stockOhlcv1hRepository;
+    private final StockCandleConverter stockCandleConverter;
+
+    /**
+     * 백테스트 결과 차트용 일봉 데이터를 조회합니다.
+     * <p>
+     * startDate ~ endDate 구간의 캔들 데이터를 반환합니다.
+     *
+     * @param stockId   종목 ID
+     * @param startDate 시작일 (LocalDate)
+     * @param endDate   종료일 (LocalDate)
+     * @return 캔들 응답 DTO 리스트
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<StockCandleResponseDTO> getBacktestDailyCandles(Long stockId, LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            throw new GeneralException(ErrorStatus._BAD_REQUEST);
+        }
+
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(23, 59, 59);
+
+        var candles = stockOhlcv1dRepository
+                .findByStockIdAndTimestampBetweenOrderByTimestampAsc(stockId, start, end);
+
+        if (candles == null || candles.isEmpty()) {
+            throw new GeneralException(ErrorStatus.CANDLE_DATA_NOT_FOUND);
+        }
+
+        return stockCandleConverter.toDtoList(candles);
+    }
+
+    /**
+     * 백테스트 결과 차트용 시간봉 데이터를 조회합니다.
+     * <p>
+     * startDate ~ endDate 구간의 캔들 데이터를 반환합니다.
+     *
+     * @param stockId    종목 ID
+     * @param startDate  시작일시 (LocalDateTime)
+     * @param endDate    종료일시 (LocalDateTime)
+     * @return 캔들 응답 DTO 리스트
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<StockCandleResponseDTO> getBacktestHourlyCandles(Long stockId, LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate == null || endDate == null) {
+            throw new GeneralException(ErrorStatus._BAD_REQUEST);
+        }
+
+        var candles = stockOhlcv1hRepository
+                .findByStockIdAndTimestampBetweenOrderByTimestampAsc(stockId, startDate, endDate);
+
+        if (candles == null || candles.isEmpty()) {
+            throw new GeneralException(ErrorStatus.CANDLE_DATA_NOT_FOUND);
+        }
+
+        return stockCandleConverter.toDtoList(candles);
+    }
+}

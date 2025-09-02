@@ -3,6 +3,7 @@ import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
 import com.synergyx.trading.apiPayload.exception.GeneralException;
 import com.synergyx.trading.dto.backtest.BacktestRequestDTO;
 import com.synergyx.trading.dto.backtest.BacktestResponseDTO;
+import com.synergyx.trading.dto.stockDetail.StockCandleResponseDTO;
 import com.synergyx.trading.model.Backtest;
 import com.synergyx.trading.model.Pattern;
 import com.synergyx.trading.model.Stock;
@@ -11,6 +12,7 @@ import com.synergyx.trading.repository.BacktestRepository;
 import com.synergyx.trading.repository.PatternRepository;
 import com.synergyx.trading.repository.StockRepository;
 import com.synergyx.trading.repository.UserRepository;
+import com.synergyx.trading.service.stockService.candle.StockCandleQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.synergyx.trading.service.backtestService.client.BacktestClientService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +34,7 @@ public class BacktestServiceImpl implements BacktestService {
     private final StockRepository stockRepository;
     private final UserRepository userRepository;
     private final BacktestClientService backtestClientService;
+    private final StockCandleQueryService stockCandleQueryService;
 
     // 백테스팅 실행
     @Override
@@ -75,6 +80,14 @@ public class BacktestServiceImpl implements BacktestService {
                 .lastMatchedDate(result.getLastMatchedDate())
                 .lastMatchedReturn(result.getLastMatchedReturn())
                 .totalReturn(result.getTotalReturn())
+                // null 허용
+                .highlightFromDate(
+                        result.getHighlightRange() != null ? result.getHighlightRange().getFromDate() : null
+                )
+                .highlightToDate(
+                        result.getHighlightRange() != null ? result.getHighlightRange().getToDate() : null
+                )
+                .periodUnit(pattern.getPeriodUnit())
                 .build());
 
         return BacktestResponseDTO.BacktestExecutionDTO.builder()
@@ -93,6 +106,15 @@ public class BacktestServiceImpl implements BacktestService {
                 .totalReturn(saved.getTotalReturn())
                 .lastMatchedDate(saved.getLastMatchedDate())
                 .lastMatchedReturn(saved.getLastMatchedReturn())
+                .highlightRange(
+                        (saved.getHighlightFromDate() != null && saved.getHighlightToDate() != null)
+                                ? BacktestResponseDTO.HighlightRangeDTO.builder()
+                                .fromDate(saved.getHighlightFromDate())
+                                .toDate(saved.getHighlightToDate())
+                                .build()
+                                : null
+                )
+                .periodUnit(saved.getPeriodUnit())
                 .build();
     }
 
@@ -101,12 +123,13 @@ public class BacktestServiceImpl implements BacktestService {
     @Transactional(readOnly = true)
     public BacktestResponseDTO.BacktestResultDetailDTO getBacktestResultDetail(Long userId, Long backtestId) {
 
-        // 사용자 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        // 유저 존재 여부 확인
+        if (!userRepository.existsById(userId)) {
+            throw new GeneralException(ErrorStatus.USER_NOT_FOUND);
+        }
 
         // 백테스팅 조회
-        Backtest backtest = backtestRepository.findById(backtestId)
+        Backtest backtest = backtestRepository.findByIdAndUserId(backtestId, userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.BACKTEST_NOT_FOUND));
 
         return BacktestResponseDTO.BacktestResultDetailDTO.builder()
@@ -126,6 +149,15 @@ public class BacktestServiceImpl implements BacktestService {
                 .lastMatchedDate(backtest.getLastMatchedDate())
                 .lastMatchedReturn(backtest.getLastMatchedReturn())
                 .totalReturn(backtest.getTotalReturn())
+                .highlightRange(
+                        (backtest.getHighlightFromDate() != null && backtest.getHighlightToDate() != null)
+                                ? BacktestResponseDTO.HighlightRangeDTO.builder()
+                                .fromDate(backtest.getHighlightFromDate())
+                                .toDate(backtest.getHighlightToDate())
+                                .build()
+                                : null
+                )
+                .periodUnit(backtest.getPeriodUnit())
                 .build();
     }
 
@@ -134,9 +166,10 @@ public class BacktestServiceImpl implements BacktestService {
     @Transactional(readOnly = true)
     public Page<BacktestResponseDTO.BacktestSummaryDTO> getBacktestResultList(Long userId, int page, int size) {
 
-        // 사용자 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        // 유저 존재 여부 확인
+        if (!userRepository.existsById(userId)) {
+            throw new GeneralException(ErrorStatus.USER_NOT_FOUND);
+        }
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("executedAt").descending());
         Page<Backtest> resultPage = backtestRepository.findByUserId(userId, pageable);
@@ -151,4 +184,38 @@ public class BacktestServiceImpl implements BacktestService {
                 .build());
     }
 
+    // 백테스팅 결과 차트 조회
+    @Override
+    @Transactional(readOnly = true)
+    public List<StockCandleResponseDTO> getBacktestResultCandles(Long userId, Long backtestId, int margin) {
+
+        // 유저 존재 여부 확인
+        if (!userRepository.existsById(userId)) {
+            throw new GeneralException(ErrorStatus.USER_NOT_FOUND);
+        }
+
+        Backtest backtest = backtestRepository.findByIdAndUserId(backtestId, userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.BACKTEST_NOT_FOUND));
+
+        if (backtest.getHighlightFromDate() == null || backtest.getHighlightToDate() == null) {
+            throw new GeneralException(ErrorStatus.HIGHLIGHT_RANGE_NOT_FOUND);
+        }
+
+        Long stockId = backtest.getStock().getId();
+        LocalDateTime from = backtest.getHighlightFromDate();
+        LocalDateTime to = backtest.getHighlightToDate();
+
+        return switch (backtest.getPeriodUnit()) {
+            case DAY -> stockCandleQueryService.getBacktestDailyCandles(
+                    stockId,
+                    from.toLocalDate().minusDays(margin),
+                    to.toLocalDate().plusDays(margin)
+            );
+            case HOUR -> stockCandleQueryService.getBacktestHourlyCandles(
+                    stockId,
+                    from.minusHours(margin),
+                    to.plusHours(margin)
+            );
+        };
+    }
 }

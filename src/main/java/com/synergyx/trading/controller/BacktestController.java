@@ -1,7 +1,9 @@
 package com.synergyx.trading.controller;
 
 import com.synergyx.trading.apiPayload.ApiResponse;
+import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
 import com.synergyx.trading.apiPayload.code.status.SuccessStatus;
+import com.synergyx.trading.apiPayload.exception.GeneralException;
 import com.synergyx.trading.dto.backtest.BacktestRequestDTO;
 import com.synergyx.trading.dto.backtest.BacktestResponseDTO;
 import com.synergyx.trading.service.backtestService.BacktestService;
@@ -42,7 +44,7 @@ public class BacktestController {
     // 과거 백테스팅 결과 상세 조회
     @Operation(summary = "백테스팅 결과 상세 조회", description = "해당 백테스팅 결과의 상세 정보를 조회합니다.")
     @GetMapping("/results/{backtestId}")
-    public ResponseEntity<?>  getBacktestResultDetail(
+    public ResponseEntity<?> getBacktestResultDetail(
             @Parameter
             @PathVariable Long backtestId) {
         BacktestResponseDTO.BacktestResultDetailDTO dto = backtestService.getBacktestResultDetail(TEMP_USER_ID, backtestId);
@@ -52,7 +54,7 @@ public class BacktestController {
     // 최근 백테스팅 결과 목록 조회
     @Operation(summary = "백테스팅 결과 목록 조회", description = "최근 백테스팅 결과 목록을 조회합니다.")
     @GetMapping("/results")
-    public ResponseEntity<?>  getBacktestResultList(
+    public ResponseEntity<?> getBacktestResultList(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
@@ -69,5 +71,29 @@ public class BacktestController {
                 .build();
 
         return ResponseEntity.ok(ApiResponse.onSuccess(dto));
+    }
+
+    // 백테스트 결과 차트 조회
+    @Operation(summary = "백테스팅 결과 차트 조회", description = "해당 백테스팅 결과의 상세 화면에 나타낼 캔들 데이터를 조회합니다. (조회 구간: 최대 수익률 구간, 마진은 선택 사항)")
+    @GetMapping("/results/{backtestId}/candles")
+    public ResponseEntity<?> getBacktestCandles(
+            @Parameter(description = "백테스트 ID")
+            @PathVariable Long backtestId,
+            @Parameter(
+                    description = "기간의 앞뒤 여유 간격(기본값: 20, 최소: 0)"
+            )
+            @RequestParam(defaultValue = "20") int margin
+    ) {
+        // 마진 입력값 검증
+        if (margin < 0) {
+            throw new GeneralException(ErrorStatus._BAD_REQUEST);
+        }
+        var candles = backtestService.getBacktestResultCandles(TEMP_USER_ID, backtestId, margin);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+                candles,
+                SuccessStatus.SUCCESS_CHART_DATA.getCode(),
+                SuccessStatus.SUCCESS_CHART_DATA.getMessage()
+        ));
     }
 }

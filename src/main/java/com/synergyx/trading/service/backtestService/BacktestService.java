@@ -18,5 +18,5 @@ public interface BacktestService {
     Page<BacktestResponseDTO.BacktestSummaryDTO> getBacktestResultList(Long userId, int page, int size);
 
     // 백테스팅 결과 차트 조회
-    List<StockCandleResponseDTO> getBacktestResultCandles(Long backtestId, Long userId, int margin);
+    List<StockCandleResponseDTO> getBacktestResultCandles(Long userId, Long backtestId, int margin);
 }

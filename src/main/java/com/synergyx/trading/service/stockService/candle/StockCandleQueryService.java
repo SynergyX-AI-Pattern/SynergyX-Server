@@ -15,5 +15,5 @@ public interface StockCandleQueryService {
     // 일봉
     List<StockCandleResponseDTO> getBacktestDailyCandles(Long stockId, LocalDate startDate, LocalDate endDate);
     // 시간봉
-    List<StockCandleResponseDTO> getBacktestHourlyCandles(Long id, LocalDateTime  startDate, LocalDateTime endDate);
+    List<StockCandleResponseDTO> getBacktestHourlyCandles(Long stockId, LocalDateTime startDate, LocalDateTime endDate);
 }

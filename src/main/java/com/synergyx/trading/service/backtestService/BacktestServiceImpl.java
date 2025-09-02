@@ -190,7 +190,7 @@ public class BacktestServiceImpl implements BacktestService {
             throw new GeneralException(ErrorStatus.USER_NOT_FOUND);
         }
 
-        Backtest backtest = backtestRepository.findById(backtestId)
+        Backtest backtest = backtestRepository.findByIdAndUserId(backtestId, userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.BACKTEST_NOT_FOUND));
 
         if (backtest.getHighlightFromDate() == null || backtest.getHighlightToDate() == null) {

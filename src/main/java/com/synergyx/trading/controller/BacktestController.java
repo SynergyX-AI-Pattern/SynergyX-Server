@@ -80,12 +80,12 @@ public class BacktestController {
             @Parameter(description = "백테스트 ID")
             @PathVariable Long backtestId,
             @Parameter(
-                    description = "기간의 앞뒤 여유 간격(기본값: 20, 최소: 0, 최대: 100)"
+                    description = "기간의 앞뒤 여유 간격(기본값: 20, 최소: 0)"
             )
             @RequestParam(defaultValue = "20") int margin
     ) {
         // 마진 입력값 검증
-        if (margin < 0 || margin > 100) {
+        if (margin < 0) {
             throw new GeneralException(ErrorStatus._BAD_REQUEST);
         }
         var candles = backtestService.getBacktestResultCandles(TEMP_USER_ID, backtestId, margin);

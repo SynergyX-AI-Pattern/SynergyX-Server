@@ -34,5 +34,5 @@ public interface BacktestRepository extends JpaRepository<Backtest, Long> {
     List<Backtest> findTop3ByPatternIdAndUserIdOrderByExecutedAtDescIdDesc(Long patternId, Long userId);
 
     // 사용자의 백테스팅 정보 조회
-    Optional<Backtest> findByIdAndUserId(Long id, Long userId);
+    Optional<Backtest> findByIdAndUserId(Long backtestId, Long userId);
 }

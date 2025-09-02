@@ -185,7 +185,7 @@ public class BacktestServiceImpl implements BacktestService {
     // 백테스팅 결과 차트 조회
     @Override
     @Transactional(readOnly = true)
-    public List<StockCandleResponseDTO> getBacktestResultCandles(Long backtestId, Long userId, int margin) {
+    public List<StockCandleResponseDTO> getBacktestResultCandles(Long userId, Long backtestId, int margin) {
 
         // 유저 존재 여부 확인
         if (!userRepository.existsById(userId)) {

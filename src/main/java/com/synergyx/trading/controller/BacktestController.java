@@ -80,7 +80,7 @@ public class BacktestController {
             @Parameter(description = "백테스트 ID")
             @PathVariable Long backtestId,
             @Parameter(
-                    description = "기간의 앞뒤 여유 간격(기본값: 20)"
+                    description = "기간의 앞뒤 여유 간격(기본값: 20, 최소: 0, 최대: 100)"
             )
             @RequestParam(defaultValue = "20") int margin
     ) {
@@ -88,7 +88,7 @@ public class BacktestController {
         if (margin < 0 || margin > 100) {
             throw new GeneralException(ErrorStatus._BAD_REQUEST);
         }
-        var candles = backtestService.getBacktestResultCandles(backtestId, TEMP_USER_ID, margin);
+        var candles = backtestService.getBacktestResultCandles(TEMP_USER_ID, backtestId, margin);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 candles,

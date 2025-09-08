@@ -63,6 +63,12 @@ public enum ErrorStatus implements BaseErrorCode {
     IMAGE_FILE_MISSING(HttpStatus.BAD_REQUEST, "IMAGE4001", "업로드된 이미지가 없습니다."),
     IMAGE_FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "IMAGE4002", "업로드 가능한 최대 용량은 5MB입니다."),
     INVALID_IMAGE_FILE_TYPE(HttpStatus.BAD_REQUEST, "IMAGE4003", "지원하지 않는 이미지 형식입니다."),
+
+    // 인증 관련 예외 처리
+    AUTH_DUPLICATE_EMAIL(HttpStatus.CONFLICT, "AUTH4001", "이미 사용 중인 이메일입니다."),
+    AUTH_INVALID_EMAIL_FORMAT(HttpStatus.BAD_REQUEST, "AUTH4002", "올바른 이메일 형식이 아닙니다."),
+    AUTH_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH4003", "인증 정보가 유효하지 않습니다."),
+    AUTH_INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "AUTH4004", "이메일 또는 비밀번호가 잘못되었습니다."),
     ;
 
     private final HttpStatus httpStatus;

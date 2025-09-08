@@ -2,6 +2,7 @@ package com.synergyx.trading.controller;
 
 import com.synergyx.trading.apiPayload.ApiResponse;
 import com.synergyx.trading.apiPayload.code.status.SuccessStatus;
+import com.synergyx.trading.config.context.UserContext;
 import com.synergyx.trading.dto.patternApply.PatternApplyRequestDTO;
 import com.synergyx.trading.dto.patternApply.PatternApplyResponseDTO;
 import com.synergyx.trading.service.patternApplyService.PatternApplyCommandService;
@@ -20,9 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/pattern-applies")
 public class PatternApplyController {
 
-    // 임시 userId
-    private static final Long TEMP_USER_ID = 1L;
-
+    private final UserContext userContext;
     private final PatternApplyCommandService patternApplyCommandService;
     private final PatternApplyQueryService patternApplyQueryService;
 
@@ -31,8 +30,9 @@ public class PatternApplyController {
     @PostMapping
     public ResponseEntity<?> applyPattern(
             @RequestBody PatternApplyRequestDTO.PatternApplyDTO request) {
+        Long userId = userContext.getCurrentUserId();
         PatternApplyResponseDTO.PatternApplyResultDTO response =
-                patternApplyCommandService.applyPattern(TEMP_USER_ID, request);
+                patternApplyCommandService.applyPattern(userId, request);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 response,
                 SuccessStatus.SUCCESS_PATTERN_APPLY.getCode(),
@@ -45,8 +45,9 @@ public class PatternApplyController {
     @PatchMapping("/{patternApplyId}/notification")
     public ResponseEntity<?>toggleNotification(
             @PathVariable @Valid @Positive Long patternApplyId) {
+        Long userId = userContext.getCurrentUserId();
         PatternApplyResponseDTO.PatternApplyToggleDTO response =
-                patternApplyCommandService.toggleNotification(TEMP_USER_ID, patternApplyId);
+                patternApplyCommandService.toggleNotification(userId, patternApplyId);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 response,
                 SuccessStatus.SUCCESS_PATTERN_NOTIFICATION_TOGGLE.getCode(),
@@ -60,7 +61,8 @@ public class PatternApplyController {
     public ResponseEntity<?> updatePatternApply(
             @PathVariable Long patternApplyId,
             @RequestBody PatternApplyRequestDTO.PatternApplyUpdateDTO request) {
-                patternApplyCommandService.updatePatternApply(TEMP_USER_ID, patternApplyId, request);
+        Long userId = userContext.getCurrentUserId();
+                patternApplyCommandService.updatePatternApply(userId, patternApplyId, request);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 SuccessStatus.SUCCESS_PATTERN_APPLY_UPDATE.getCode(),
                 SuccessStatus.SUCCESS_PATTERN_APPLY_UPDATE.getMessage()
@@ -71,7 +73,8 @@ public class PatternApplyController {
     @Operation(summary = "패턴 적용 해제", description = "종목에 적용된 패턴을 해제합니다.")
     @DeleteMapping("/{patternApplyId}")
     public ResponseEntity<?> deletePatternApply(@PathVariable Long patternApplyId) {
-        patternApplyCommandService.deletePatternApply(TEMP_USER_ID, patternApplyId);
+        Long userId = userContext.getCurrentUserId();
+        patternApplyCommandService.deletePatternApply(userId, patternApplyId);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 SuccessStatus.SUCCESS_PATTERN_APPLY_UNLINK.getCode(),
                 SuccessStatus.SUCCESS_PATTERN_APPLY_UNLINK.getMessage()
@@ -84,8 +87,9 @@ public class PatternApplyController {
     public ResponseEntity<?> getPatternApplyDetailByStockId(
             @PathVariable Long stockId
     ) {
+        Long userId = userContext.getCurrentUserId();
         PatternApplyResponseDTO.PatternApplyDetailDTO response =
-                patternApplyQueryService.getPatternApplyDetail(TEMP_USER_ID, stockId);
+                patternApplyQueryService.getPatternApplyDetail(userId, stockId);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 response,
                 SuccessStatus.SUCCESS_PATTERN_APPLY_DETAIL.getCode(),

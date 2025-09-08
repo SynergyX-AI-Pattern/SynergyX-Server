@@ -1,6 +1,7 @@
 package com.synergyx.trading.controller;
 
 import com.synergyx.trading.apiPayload.ApiResponse;
+import com.synergyx.trading.config.context.UserContext;
 import com.synergyx.trading.dto.notification.NotificationRequestDTO;
 import com.synergyx.trading.dto.notification.NotificationResponseDTO;
 import com.synergyx.trading.service.notificationService.NotificationService;
@@ -21,9 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "알림 API", description = "알림 관련 API 입니다.")
 public class NotificationController {
 
-    // 임시 userId
-    private static final Long TEMP_USER_ID = 1L;
-
+    private final UserContext userContext;
     private final NotificationService notificationService;
 
     @Operation(summary = "알림 푸시 및 저장",
@@ -33,7 +32,8 @@ public class NotificationController {
     public ResponseEntity<?> sendAndSaveNotification(
             @RequestBody @Valid NotificationRequestDTO request
     ) {
-        NotificationResponseDTO result = notificationService.sendAndSaveNotification(TEMP_USER_ID, request);
+        Long userId = userContext.getCurrentUserId();
+        NotificationResponseDTO result = notificationService.sendAndSaveNotification(userId, request);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 result,

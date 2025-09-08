@@ -48,6 +48,11 @@ public enum SuccessStatus implements BaseCode {
     // 감정 투자 일기
     SUCCESS_WRITE_EMOTION_DIARY(HttpStatus.OK, "DIARY200", "감정 투자 일기 작성 성공"),
     SUCCESS_DELETE_EMOTION_DIARY(HttpStatus.OK, "DIARY2002", "감정 투자 일기가 삭제되었습니다."),
+
+    // 인증
+    AUTH_LOGIN_SUCCESS(HttpStatus.OK, "AUTH200", "로그인 성공"),
+    AUTH_SIGNUP_SUCCESS(HttpStatus.OK, "AUTH201", "회원가입 성공"),
+    AUTH_LOGOUT_SUCCESS(HttpStatus.OK, "AUTH202", "로그아웃 성공")
     ;
 
     private final HttpStatus httpStatus;

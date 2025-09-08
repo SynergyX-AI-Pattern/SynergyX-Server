@@ -1,5 +1,6 @@
 package com.synergyx.trading.controller;
 
+import com.synergyx.trading.config.context.UserContext;
 import com.synergyx.trading.dto.pattern.PatternRequestDTO;
 import com.synergyx.trading.dto.pattern.PatternResponseDTO;
 import com.synergyx.trading.service.patternService.PatternCommandService;
@@ -22,9 +23,7 @@ import java.util.List;
 @Tag(name = "패턴 API", description = "패턴 관련 API 입니다.")
 public class PatternController {
 
-    // 임시 userId
-    private static final Long TEMP_USER_ID = 1L;
-
+    private final UserContext userContext;
     private final PatternCommandService patternCommandService;
     private final PatternQueryService patternQueryService;
 
@@ -38,7 +37,8 @@ public class PatternController {
     )
     @PostMapping
     public ResponseEntity<?> createPattern(@RequestBody @Valid PatternRequestDTO dto) {
-        PatternResponseDTO.PatternDTO createdPattern = patternCommandService.createPattern(TEMP_USER_ID, dto);
+        Long userId = userContext.getCurrentUserId();
+        PatternResponseDTO.PatternDTO createdPattern = patternCommandService.createPattern(userId, dto);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 createdPattern,
@@ -51,7 +51,8 @@ public class PatternController {
     @Operation(summary = "패턴 목록 조회", description = "사용자의 종목 패턴 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<?> getPatternList() {
-    List<PatternResponseDTO.PatternDTO> list = patternQueryService.getPatternList(TEMP_USER_ID);
+        Long userId = userContext.getCurrentUserId();
+    List<PatternResponseDTO.PatternDTO> list = patternQueryService.getPatternList(userId);
     return ResponseEntity.ok(ApiResponse.onSuccess(list));
     }
 
@@ -61,7 +62,8 @@ public class PatternController {
     public ResponseEntity<?> getPatternDetail(
             @Parameter
             @PathVariable Long patternId) {
-        PatternResponseDTO.PatternDetailDTO dto = patternQueryService.getPatternDetail(TEMP_USER_ID, patternId);
+        Long userId = userContext.getCurrentUserId();
+        PatternResponseDTO.PatternDetailDTO dto = patternQueryService.getPatternDetail(userId, patternId);
         return ResponseEntity.ok(ApiResponse.onSuccess(dto));
     }
 
@@ -72,7 +74,8 @@ public class PatternController {
     public ResponseEntity<?> updatePattern(
             @PathVariable Long patternId,
             @RequestBody PatternRequestDTO dto) {
-        patternCommandService.updatePattern(TEMP_USER_ID, patternId, dto);
+        Long userId = userContext.getCurrentUserId();
+        patternCommandService.updatePattern(userId, patternId, dto);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 SuccessStatus.SUCCESS_PATTERN_UPDATE.getCode(),
                 SuccessStatus.SUCCESS_PATTERN_UPDATE.getMessage()
@@ -85,7 +88,8 @@ public class PatternController {
     public ResponseEntity<?> deletePattern(
             @Parameter
             @PathVariable Long patternId) {
-        patternCommandService.deletePattern(TEMP_USER_ID, patternId);
+        Long userId = userContext.getCurrentUserId();
+        patternCommandService.deletePattern(userId, patternId);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 SuccessStatus.SUCCESS_PATTERN_DELETE.getCode(),
                 SuccessStatus.SUCCESS_PATTERN_DELETE.getMessage()

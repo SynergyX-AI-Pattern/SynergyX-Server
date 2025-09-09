@@ -5,6 +5,7 @@ import com.synergyx.trading.apiPayload.code.status.SuccessStatus;
 import com.synergyx.trading.dto.stockDetail.RankedStockDTO;
 import com.synergyx.trading.dto.stockDetail.StockCandleResponseDTO;
 import com.synergyx.trading.dto.stockDetail.StockDetailResponseDTO;
+import com.synergyx.trading.dto.stockSearch.StockSearchFastApiResponseDTO;
 import com.synergyx.trading.dto.stockSearch.StockSearchResponseDTO;
 import com.synergyx.trading.service.stockService.candle.StockCandleQueryService;
 import com.synergyx.trading.service.stockService.detail.StockDetailQueryService;
@@ -72,7 +73,6 @@ public class StockController {
                 SuccessStatus.SUCCESS_CHART_DATA.getMessage()
         ));
     }
-
     @Operation(summary = "TOP 20 종목 조회", description = "TOP 20 종목을 조회합니다. (거래대금 기준)")
     @GetMapping("/top20")
     public ResponseEntity<?> getTop20Stocks() {
@@ -95,7 +95,7 @@ public class StockController {
                     required = true
             )
             @RequestParam("image") MultipartFile image) {
-        StockSearchResponseDTO result = stockSearchQueryService.searchStockByImage(image);
+        StockSearchFastApiResponseDTO.StockSearchFastApiInfoResponseDTO result = stockSearchQueryService.searchStockByImage(image);
         return ResponseEntity.ok(ApiResponse.onSuccess(result));
     }
 }

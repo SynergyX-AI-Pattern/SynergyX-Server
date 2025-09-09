@@ -2,6 +2,7 @@ package com.synergyx.trading.controller;
 
 import com.synergyx.trading.apiPayload.ApiResponse;
 import com.synergyx.trading.apiPayload.code.status.SuccessStatus;
+import com.synergyx.trading.config.context.UserContext;
 import com.synergyx.trading.dto.stockDetail.RankedStockDTO;
 import com.synergyx.trading.dto.stockDetail.StockCandleResponseDTO;
 import com.synergyx.trading.dto.stockDetail.StockDetailResponseDTO;
@@ -28,9 +29,7 @@ import java.util.List;
 @Tag(name = "종목 상세 | 홈 API", description = "종목 상세, 홈 화면 관련 API 입니다.")
 public class StockController {
 
-    // 임시 userId
-    private static final Long TEMP_USER_ID = 1L;
-
+    private final UserContext userContext;
     private final StockSearchQueryService stockSearchQueryService;
     private final StockDetailQueryService stockDetailQueryService;
     private final StockCandleQueryService stockCandleQueryService;
@@ -39,7 +38,8 @@ public class StockController {
     @Operation(summary = "종목 상세 조회", description = "종목 상세 정보를 조회합니다.")
     @GetMapping("/{stockId}/detail")
     public ResponseEntity<?> getStockDetail(@PathVariable Long stockId) {
-        StockDetailResponseDTO dto = stockDetailQueryService.getStockDetail(stockId, TEMP_USER_ID);
+        Long userId = userContext.getCurrentUserId();
+        StockDetailResponseDTO dto = stockDetailQueryService.getStockDetail(stockId, userId);
         return ResponseEntity.ok(ApiResponse.onSuccess(dto));
     }
 

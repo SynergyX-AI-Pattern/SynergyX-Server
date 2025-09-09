@@ -2,6 +2,7 @@ package com.synergyx.trading.controller;
 
 import com.synergyx.trading.apiPayload.ApiResponse;
 import com.synergyx.trading.apiPayload.code.status.SuccessStatus;
+import com.synergyx.trading.config.context.UserContext;
 import com.synergyx.trading.dto.InterestStock.InterestStockResponseDTO;
 import com.synergyx.trading.service.InterestStockService.InterestStockCommandService;
 import com.synergyx.trading.service.InterestStockService.InterestStockQueryService;
@@ -20,9 +21,7 @@ import java.util.List;
 @Tag(name = "관심종목 API", description = "관심종목 관련 API 입니다.")
 public class InterestStockController {
 
-    // 임시 userId
-    private static final Long TEMP_USER_ID = 1L;
-
+    private final UserContext userContext;
     private final InterestStockCommandService interestStockCommandService;
     private final InterestStockQueryService interestStockQueryService;
 
@@ -31,7 +30,8 @@ public class InterestStockController {
     public ResponseEntity<?> addWatchlist(
             @Parameter
             @PathVariable Long stockId) {
-        interestStockCommandService.addInterest(TEMP_USER_ID, stockId);
+        Long userId = userContext.getCurrentUserId();
+        interestStockCommandService.addInterest(userId, stockId);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 SuccessStatus.SUCCESS_WATCHLIST_ADD.getCode(),
                 SuccessStatus.SUCCESS_WATCHLIST_ADD.getMessage()
@@ -43,7 +43,8 @@ public class InterestStockController {
     public ResponseEntity<?> removeWatchlist(
             @Parameter
             @PathVariable Long stockId) {
-        interestStockCommandService.removeInterest(TEMP_USER_ID, stockId);
+        Long userId = userContext.getCurrentUserId();
+        interestStockCommandService.removeInterest(userId, stockId);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 SuccessStatus.SUCCESS_WATCHLIST_REMOVE.getCode(),
                 SuccessStatus.SUCCESS_WATCHLIST_REMOVE.getMessage()
@@ -53,14 +54,16 @@ public class InterestStockController {
     @Operation(summary = "관심종목 목록 조회", description = "현재 등록된 관심종목 목록을 조회합니다.")
     @GetMapping("/watchlist")
     public ResponseEntity<?> getWatchlist() {
-        List<InterestStockResponseDTO> list = interestStockQueryService.getInterestList(TEMP_USER_ID);
+        Long userId = userContext.getCurrentUserId();
+        List<InterestStockResponseDTO> list = interestStockQueryService.getInterestList(userId);
         return ResponseEntity.ok(ApiResponse.onSuccess(list));
     }
 
     @Operation(summary = "최근 조회 종목 리스트 조회", description = "최근 조회한 종목 리스트를 조회합니다. (최대 20개)")
     @GetMapping("/stocks/recent")
     public ResponseEntity<?> getRecentViewStockList() {
-        List<InterestStockResponseDTO> list = interestStockQueryService.getRecentViewStocks(TEMP_USER_ID);
+        Long userId = userContext.getCurrentUserId();
+        List<InterestStockResponseDTO> list = interestStockQueryService.getRecentViewStocks(userId);
         return ResponseEntity.ok(ApiResponse.onSuccess(list));
     }
 }

@@ -7,7 +7,6 @@ import com.synergyx.trading.dto.user.LoginRequestDTO;
 import com.synergyx.trading.dto.user.LoginResponseDTO;
 import com.synergyx.trading.dto.user.SignupRequestDTO;
 import com.synergyx.trading.service.userService.UserAuthService;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -32,13 +31,12 @@ public class AuthController {
     @PostMapping("/signup")
     @Operation(summary = "회원가입",
             description = "새로운 계정을 생성합니다.")
-    public ResponseEntity<ApiResponse<SignupRequestDTO>> signup(
+    public ResponseEntity<ApiResponse<Void>> signup(
             @Valid @RequestBody SignupRequestDTO request
     ) {
         userAuthService.createUser(request);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
-                null,
                 SuccessStatus.AUTH_SIGNUP_SUCCESS.getCode(),
                 SuccessStatus.AUTH_SIGNUP_SUCCESS.getMessage()
         ));
@@ -72,7 +70,6 @@ public class AuthController {
         userAuthService.logout(userId);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
-                null,
                 SuccessStatus.AUTH_LOGOUT_SUCCESS.getCode(),
                 SuccessStatus.AUTH_LOGOUT_SUCCESS.getMessage()
         ));

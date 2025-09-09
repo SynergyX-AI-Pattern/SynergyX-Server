@@ -112,7 +112,7 @@ public class UserAuthServiceImpl implements UserAuthService {
      * SecurityContext에 인증 객체를 설정
      */
     private void setAuthentication(User user) {
-        Authentication authentication = new UserAuthentication(user.getId(), null, null);
+        Authentication authentication = new UserAuthentication(user.getId(), null, java.util.Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         log.debug("[AUTH] SecurityContext에 인증 객체 설정 완료 - userId={}", user.getId());
     }

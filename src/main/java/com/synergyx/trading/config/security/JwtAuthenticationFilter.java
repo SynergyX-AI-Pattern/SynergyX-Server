@@ -20,7 +20,9 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Collections;
 
 @Slf4j
 @Component
@@ -108,7 +110,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             // authentication 생성 -> principal에 userId 저장
-            UserAuthentication authentication = new UserAuthentication(userId, null, null);
+            UserAuthentication authentication = new UserAuthentication(userId, null, Collections.emptyList());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 

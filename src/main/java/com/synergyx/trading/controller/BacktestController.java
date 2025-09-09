@@ -4,6 +4,7 @@ import com.synergyx.trading.apiPayload.ApiResponse;
 import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
 import com.synergyx.trading.apiPayload.code.status.SuccessStatus;
 import com.synergyx.trading.apiPayload.exception.GeneralException;
+import com.synergyx.trading.config.context.UserContext;
 import com.synergyx.trading.dto.backtest.BacktestRequestDTO;
 import com.synergyx.trading.dto.backtest.BacktestResponseDTO;
 import com.synergyx.trading.service.backtestService.BacktestService;
@@ -21,9 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "백테스팅 API", description = "백테스팅 관련 API 입니다.")
 public class BacktestController {
 
-    // 임시 userId
-    private static final Long TEMP_USER_ID = 1L;
-
+    private final UserContext userContext;
     private final BacktestService backtestService;
 
     // 백테스트 실행
@@ -33,7 +32,8 @@ public class BacktestController {
             @RequestParam Long patternId,
             @RequestParam Long stockId,
             @RequestBody BacktestRequestDTO request) {
-        BacktestResponseDTO.BacktestExecutionDTO result = backtestService.runBacktest(TEMP_USER_ID, patternId, stockId, request);
+        Long userId = userContext.getCurrentUserId();
+        BacktestResponseDTO.BacktestExecutionDTO result = backtestService.runBacktest(userId, patternId, stockId, request);
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 result,
                 SuccessStatus.SUCCESS_BACKTEST_EXECUTE.getCode(),
@@ -47,7 +47,8 @@ public class BacktestController {
     public ResponseEntity<?> getBacktestResultDetail(
             @Parameter
             @PathVariable Long backtestId) {
-        BacktestResponseDTO.BacktestResultDetailDTO dto = backtestService.getBacktestResultDetail(TEMP_USER_ID, backtestId);
+        Long userId = userContext.getCurrentUserId();
+        BacktestResponseDTO.BacktestResultDetailDTO dto = backtestService.getBacktestResultDetail(userId, backtestId);
         return ResponseEntity.ok(ApiResponse.onSuccess(dto));
     }
 
@@ -58,7 +59,8 @@ public class BacktestController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        Page<BacktestResponseDTO.BacktestSummaryDTO> resultPage = backtestService.getBacktestResultList(TEMP_USER_ID, page - 1, size);
+        Long userId = userContext.getCurrentUserId();
+        Page<BacktestResponseDTO.BacktestSummaryDTO> resultPage = backtestService.getBacktestResultList(userId, page - 1, size);
 
         BacktestResponseDTO.BacktestResultListDTO dto = BacktestResponseDTO.BacktestResultListDTO.builder()
                 .content(resultPage.getContent())
@@ -88,7 +90,8 @@ public class BacktestController {
         if (margin < 0) {
             throw new GeneralException(ErrorStatus._BAD_REQUEST);
         }
-        var candles = backtestService.getBacktestResultCandles(TEMP_USER_ID, backtestId, margin);
+        Long userId = userContext.getCurrentUserId();
+        var candles = backtestService.getBacktestResultCandles(userId, backtestId, margin);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(
                 candles,

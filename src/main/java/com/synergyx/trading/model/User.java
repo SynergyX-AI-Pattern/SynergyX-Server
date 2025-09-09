@@ -23,6 +23,9 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 20)
     private String username;
 
+    @Column(nullable = false, length = 255, unique = true)
+    private String email;
+
     @Column(length = 255)
     private String image;
 
@@ -35,10 +38,10 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private boolean pushEnabled;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String accessToken;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String refreshToken;
 
     @Column(columnDefinition = "TEXT")

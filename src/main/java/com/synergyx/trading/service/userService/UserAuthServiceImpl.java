@@ -47,7 +47,11 @@ public class UserAuthServiceImpl implements UserAuthService {
                 .agreeEvent(request.event())
                 .build();
 
-        userRepository.save(user);
+        try {
+            userRepository.save(user);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new GeneralException(ErrorStatus.AUTH_DUPLICATE_EMAIL);
+        }
         log.info("[SIGNUP] 신규 회원가입 완료 - email={}", user.getEmail());
     }
 

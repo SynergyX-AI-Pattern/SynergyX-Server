@@ -1,10 +1,9 @@
 package com.synergyx.trading.service.stockService.search;
 
-import com.synergyx.trading.dto.stockSearch.StockSearchFastApiWrapperDTO;
+import com.synergyx.trading.dto.stockSearch.StockSearchFastApiResponseDTO;
 import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
 import com.synergyx.trading.apiPayload.exception.GeneralException;
 import com.synergyx.trading.dto.stockSearch.StockSearchResponseDTO;
-import com.synergyx.trading.model.Stock;
 import com.synergyx.trading.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -46,7 +45,7 @@ public class StockSearchQueryServiceImpl implements StockSearchQueryService {
      * @return StockSearchResponseDTO
      */
     @Override
-    public StockSearchResponseDTO searchStockByImage(MultipartFile image) {
+    public StockSearchFastApiResponseDTO.StockSearchFastApiInfoResponseDTO searchStockByImage(MultipartFile image) {
         // 파일 검증
         if (image.isEmpty()) {
             throw new GeneralException(ErrorStatus.IMAGE_FILE_MISSING);
@@ -67,26 +66,23 @@ public class StockSearchQueryServiceImpl implements StockSearchQueryService {
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
             builder.part("image", image.getResource());
 
-            StockSearchFastApiWrapperDTO response = fastApiWebClient.post()
+            StockSearchFastApiResponseDTO.StockSearchFastApiWrapperDTO response = fastApiWebClient.post()
                     .uri("/api/v1/stocks/search-by-image")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .bodyValue(builder.build())
                     .retrieve()
-                    .bodyToMono(StockSearchFastApiWrapperDTO.class)
+                    .bodyToMono(StockSearchFastApiResponseDTO.StockSearchFastApiWrapperDTO.class)
                     .block();
 
             if (response == null || !response.isSuccess()) {
                 throw new GeneralException(ErrorStatus.IMAGE_STOCK_NOT_FOUND);
             }
 
-            Long stockId = response.getData().getId();
-            Stock stock = stockRepository.findById(stockId)
-                    .orElseThrow(() -> new GeneralException(ErrorStatus.STOCK_NOT_FOUND));
-
-            return StockSearchResponseDTO.builder()
-                    .id(stock.getId())
-                    .name(stock.getName())
-                    .imageUrl(stock.getImageUrl())
+            return StockSearchFastApiResponseDTO.StockSearchFastApiInfoResponseDTO.builder()
+                    .id(response.getData().getId())
+                    .name(response.getData().getName())
+                    .imageUrl(response.getData().getImageUrl())
+                    .status(response.getData().getStatus())
                     .build();
 
         } catch (Exception e) {

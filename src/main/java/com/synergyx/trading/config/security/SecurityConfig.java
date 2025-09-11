@@ -28,7 +28,8 @@ public class SecurityConfig {
     private static final String[] AUTH_WHITELIST = {
             "/auth/signup",
             "/auth/login",
-            "/test/**"
+            "/test/**",
+            "/prediction/**"
     };
 
     private static final String[] SWAGGER_WHITELIST = {

@@ -13,4 +13,7 @@ public interface UserAuthService {
 
     // 로그아웃
     void logout(Long userId);
+
+    // 회원탈퇴
+    void withdrawUser(Long userId);
 }

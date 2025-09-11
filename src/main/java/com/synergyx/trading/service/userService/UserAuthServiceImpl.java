@@ -113,6 +113,26 @@ public class UserAuthServiceImpl implements UserAuthService {
     }
 
     /**
+     * 회원 탈퇴 (soft delete)
+     */
+    @Override
+    @Transactional
+    public void withdrawUser(Long userId) {
+        userRepository.findById(userId).ifPresent(user -> {
+            user.setEmail("deleted_" + user.getId() + "@example.com");
+            user.setPassword("");
+            user.setAccessToken(null);
+            user.setRefreshToken(null);
+            user.setFcmToken(null);
+            user.setUsername("탈퇴회원");
+            user.setAgreeMarketing(false);
+            user.setAgreeEvent(false);
+            user.setPushEnabled(false);
+            user.setDeleted(true); // soft delete flag
+        });
+    }
+
+    /**
      * SecurityContext에 인증 객체를 설정
      */
     private void setAuthentication(User user) {

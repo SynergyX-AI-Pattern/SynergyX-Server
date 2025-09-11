@@ -50,9 +50,10 @@ public enum SuccessStatus implements BaseCode {
     SUCCESS_DELETE_EMOTION_DIARY(HttpStatus.OK, "DIARY2002", "감정 투자 일기가 삭제되었습니다."),
 
     // 인증
-    AUTH_LOGIN_SUCCESS(HttpStatus.OK, "AUTH200", "로그인 성공"),
-    AUTH_SIGNUP_SUCCESS(HttpStatus.OK, "AUTH201", "회원가입 성공"),
-    AUTH_LOGOUT_SUCCESS(HttpStatus.OK, "AUTH202", "로그아웃 성공")
+    AUTH_LOGIN_SUCCESS(HttpStatus.OK, "AUTH2000", "로그인 성공"),
+    AUTH_SIGNUP_SUCCESS(HttpStatus.OK, "AUTH2001", "회원가입 성공"),
+    AUTH_LOGOUT_SUCCESS(HttpStatus.OK, "AUTH2002", "로그아웃 성공"),
+    AUTH_WITHDRAW_SUCCESS(HttpStatus.OK, "AUTH2003", "회원탈퇴 성공")
     ;
 
     private final HttpStatus httpStatus;

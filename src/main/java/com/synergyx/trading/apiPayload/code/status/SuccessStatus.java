@@ -53,7 +53,11 @@ public enum SuccessStatus implements BaseCode {
     AUTH_LOGIN_SUCCESS(HttpStatus.OK, "AUTH2000", "로그인 성공"),
     AUTH_SIGNUP_SUCCESS(HttpStatus.OK, "AUTH2001", "회원가입 성공"),
     AUTH_LOGOUT_SUCCESS(HttpStatus.OK, "AUTH2002", "로그아웃 성공"),
-    AUTH_WITHDRAW_SUCCESS(HttpStatus.OK, "AUTH2003", "회원탈퇴 성공")
+    AUTH_WITHDRAW_SUCCESS(HttpStatus.OK, "AUTH2003", "회원탈퇴 성공"),
+
+    // User
+    USER_PROFILE_SUCCESS(HttpStatus.OK, "USER2000", "프로필 조회 성공"),
+    USER_PROFILE_UPDATE_SUCCESS(HttpStatus.OK, "USER2001", "프로필 수정 성공")
     ;
 
     private final HttpStatus httpStatus;

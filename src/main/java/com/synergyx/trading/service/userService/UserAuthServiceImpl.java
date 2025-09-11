@@ -118,18 +118,19 @@ public class UserAuthServiceImpl implements UserAuthService {
     @Override
     @Transactional
     public void withdrawUser(Long userId) {
-        userRepository.findById(userId).ifPresent(user -> {
-            user.setEmail("deleted_" + user.getId() + "@example.com");
-            user.setPassword("");
-            user.setAccessToken(null);
-            user.setRefreshToken(null);
-            user.setFcmToken(null);
-            user.setUsername("탈퇴회원");
-            user.setAgreeMarketing(false);
-            user.setAgreeEvent(false);
-            user.setPushEnabled(false);
-            user.setDeleted(true); // soft delete flag
-        });
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        user.setEmail("deleted_" + user.getId() + "@example.com");
+        user.setPassword("");
+        user.setAccessToken(null);
+        user.setRefreshToken(null);
+        user.setFcmToken(null);
+        user.setUsername("탈퇴회원");
+        user.setAgreeMarketing(false);
+        user.setAgreeEvent(false);
+        user.setPushEnabled(false);
+        user.setDeleted(true); // soft delete flag
     }
 
     /**

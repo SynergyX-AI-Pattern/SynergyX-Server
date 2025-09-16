@@ -2,6 +2,7 @@ package com.synergyx.trading.service.userService;
 
 import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
 import com.synergyx.trading.apiPayload.exception.GeneralException;
+import com.synergyx.trading.dto.user.ProfileUpdateRequestDTO;
 import com.synergyx.trading.model.User;
 import com.synergyx.trading.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,18 @@ public class UserCommandServiceImpl implements UserCommandService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
 
         user.setFcmToken(fcmToken);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void updateProfile(Long userId, ProfileUpdateRequestDTO requestDTO) {
+        String newName = requestDTO.name();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        user.setUsername(newName);
         userRepository.save(user);
     }
 }

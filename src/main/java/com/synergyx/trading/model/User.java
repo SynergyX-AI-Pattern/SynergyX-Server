@@ -46,4 +46,7 @@ public class User extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     private String fcmToken;
+
+    @Column(nullable = false)
+    private boolean deleted;
 }

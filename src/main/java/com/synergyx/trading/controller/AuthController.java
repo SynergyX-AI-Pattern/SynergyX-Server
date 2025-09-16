@@ -74,4 +74,19 @@ public class AuthController {
                 SuccessStatus.AUTH_LOGOUT_SUCCESS.getMessage()
         ));
     }
+
+    @PostMapping("/withdraw")
+    @Operation(summary = "회원 탈퇴",
+            description = "현재 로그인된 사용자를 탈퇴 처리합니다.")
+    public ResponseEntity<ApiResponse<Void>> withdraw(
+    ) {
+        Long userId = userContext.getCurrentUserId();
+
+        userAuthService.withdrawUser(userId);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+                SuccessStatus.AUTH_WITHDRAW_SUCCESS.getCode(),
+                SuccessStatus.AUTH_WITHDRAW_SUCCESS.getMessage()
+        ));
+    }
 }

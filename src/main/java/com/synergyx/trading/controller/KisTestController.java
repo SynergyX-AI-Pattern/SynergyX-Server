@@ -244,7 +244,7 @@ public class KisTestController {
     }
 
     @Operation(summary = "종목 구간 과거 1년간 15분 Ohlcv 업데이트 API", description = "startId ~ endId 사이 종목들의 1년간의 15분봉 OHLCV를 업데이트합니다.")
-//    @PostMapping("/stocks/ohlcv/15m/range")
+    @PostMapping("/stocks/ohlcv/15m/range")
     public ResponseEntity<?> updatePast15mOhlcvByStockIdRange(
             @Parameter(description = "시작 종목 ID", required = true)
             @RequestParam Long startId,

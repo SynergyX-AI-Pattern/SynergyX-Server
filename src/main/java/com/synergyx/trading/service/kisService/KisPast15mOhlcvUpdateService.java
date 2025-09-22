@@ -107,7 +107,7 @@ public class KisPast15mOhlcvUpdateService {
                 cursor = oldestTime.minusMinutes(1);
 
                 // API 호출 간격 제한
-                Thread.sleep(3000);
+                Thread.sleep(7000);
             }
 
             log.info("[KIS-15m] 1분봉 수집 완료 - stockSymbol={}, date={}, 총호출={}, 수집개수={}",

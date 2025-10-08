@@ -12,7 +12,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,11 +41,23 @@ public class BacktestRankingService {
         // Repository 호출
         List<BacktestRankingDTO> rankings = backtestRankingRepository.findMonthlyUserMaxReturnRankings(startOfMonth, endOfMonth, PageRequest.of(0, limit));
 
+        // 백테스트 ID 목록 추출
+        List<Long> backtestIds = rankings.stream()
+                .map(BacktestRankingDTO::getBacktestId)
+                .toList();
+
+        // 일괄 조회
+        Map<Long, Backtest> backtestMap = backtestRepository.findAllById(backtestIds)
+                .stream()
+                .collect(Collectors.toMap(Backtest::getId, Function.identity()));
+
         // 점 개수 3개 이상 조건 필터링
         rankings = rankings.stream()
                 .filter(r -> {
-                    Backtest backtest = backtestRepository.findById(r.getBacktestId())
-                            .orElseThrow(() -> new GeneralException(ErrorStatus.BACKTEST_NOT_FOUND));
+                    Backtest backtest = backtestMap.get(r.getBacktestId());
+                    if (backtest == null) {
+                        throw new GeneralException(ErrorStatus.BACKTEST_NOT_FOUND);
+                    }
                     return backtest.getPattern().getPoints().size() >= 3;
                 })
                 .toList();

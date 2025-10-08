@@ -8,6 +8,7 @@ import com.synergyx.trading.config.context.UserContext;
 import com.synergyx.trading.dto.backtest.BacktestRequestDTO;
 import com.synergyx.trading.dto.backtest.BacktestResponseDTO;
 import com.synergyx.trading.service.backtestService.BacktestService;
+import com.synergyx.trading.service.backtestService.ranking.BacktestRankingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class BacktestController {
 
     private final UserContext userContext;
     private final BacktestService backtestService;
+    private final BacktestRankingService backtestRankingService;
 
     // 백테스트 실행
     @Operation(summary = "백테스팅 실행", description = "백테스팅을 실행합니다.")
@@ -97,6 +100,20 @@ public class BacktestController {
                 candles,
                 SuccessStatus.SUCCESS_CHART_DATA.getCode(),
                 SuccessStatus.SUCCESS_CHART_DATA.getMessage()
+        ));
+    }
+
+    // 백테스팅 랭킹 조회
+    @Operation(summary = "백테스팅 랭킹 조회", description = "최대 수익률을 기준으로 백테스팅 랭킹을 조회합니다. (조건: 점 3개 이상의 패턴으로 실행된 백테스팅)")
+    @GetMapping("/rankings")
+    public ResponseEntity<?> getRankings(
+            @RequestParam(required = false, defaultValue = "100") int limit) {
+        List<?> rankings = backtestRankingService.getRanking(limit);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(
+                rankings,
+                SuccessStatus.SUCCESS_RANKING.getCode(),
+                SuccessStatus.SUCCESS_RANKING.getMessage()
         ));
     }
 }

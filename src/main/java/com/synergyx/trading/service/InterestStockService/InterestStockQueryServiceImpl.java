@@ -3,6 +3,8 @@ package com.synergyx.trading.service.InterestStockService;
 import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
 import com.synergyx.trading.apiPayload.exception.GeneralException;
 import com.synergyx.trading.dto.InterestStock.InterestStockResponseDTO;
+import com.synergyx.trading.model.Stock;
+import com.synergyx.trading.model.StockDetail;
 import com.synergyx.trading.model.User;
 import com.synergyx.trading.repository.InterestStockRepository;
 import com.synergyx.trading.repository.RecentViewStockRepository;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static com.synergyx.trading.util.ParsingUtil.toFormattedNumber;
 
 @Service
 @RequiredArgsConstructor
@@ -34,13 +38,20 @@ public class InterestStockQueryServiceImpl implements InterestStockQueryService 
         User user = getValidUser(userId);
 
         return interestStockRepository.findAllByUserId(userId).stream()
-                .map(i -> InterestStockResponseDTO.builder()
-                        .stockId(i.getStock().getId())
-                        .stockName(i.getStock().getName())
-                        .stockSymbol(i.getStock().getSymbol())
-                        .imageUrl(i.getStock().getImageUrl())
-                        .build()
-                ).toList();
+                .map(i -> {
+                    Stock stock = i.getStock();
+                    StockDetail detail = stock.getStockDetail(); // entity graph로 fetch
+
+                    return InterestStockResponseDTO.builder()
+                            .stockId(i.getStock().getId())
+                            .stockName(i.getStock().getName())
+                            .stockSymbol(i.getStock().getSymbol())
+                            .price(detail != null ? toFormattedNumber(detail.getPrice()) : null)
+                            .changeRate(detail != null ? (detail.getChangeRate() + "%") : null)
+                            .imageUrl(i.getStock().getImageUrl())
+                            .build();
+                })
+                .toList();
     }
 
     /**
@@ -54,7 +65,21 @@ public class InterestStockQueryServiceImpl implements InterestStockQueryService 
     public List<InterestStockResponseDTO> getRecentViewStocks(Long userId) {
         User user = getValidUser(userId);
 
-        return recentViewStockRepository.findRecentStocksWithInfo(userId);
+        return recentViewStockRepository.findByUserIdOrderByViewedAtDesc(userId).stream()
+                .map(r -> {
+                    var stock = r.getStock();
+                    var detail = stock.getStockDetail();
+
+                    return InterestStockResponseDTO.builder()
+                            .stockId(stock.getId())
+                            .stockName(stock.getName())
+                            .stockSymbol(stock.getSymbol())
+                            .price(detail != null ? toFormattedNumber(detail.getPrice()) : null)
+                            .changeRate(detail != null ? (detail.getChangeRate() + "%") : null)
+                            .imageUrl(stock.getImageUrl())
+                            .build();
+                })
+                .toList();
     }
 
     /**

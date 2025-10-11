@@ -79,13 +79,22 @@ public class InterestStockCommandServiceImpl implements InterestStockCommandServ
     @Override
     @Transactional(propagation = REQUIRES_NEW)
     public void addRecentView(Long userId, Long stockId) {
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+        // 종목 조회
+        Stock stock = stockRepository.findById(stockId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.STOCK_NOT_FOUND));
+
         // 중복 제거
         recentViewStockRepository.deleteByUserIdAndStockId(userId, stockId);
 
+        // 기록 저장
         recentViewStockRepository.save(
                 RecentViewStock.builder()
-                        .userId(userId)
-                        .stockId(stockId)
+                        .user(user)
+                        .stock(stock)
                         .viewedAt(LocalDateTime.now())
                         .build()
         );

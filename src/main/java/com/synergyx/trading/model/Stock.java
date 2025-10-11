@@ -24,4 +24,7 @@ public class Stock extends BaseEntity {
 
     @Column(name = "image_url", nullable = true, length = 255)
     private String imageUrl;
+
+    @OneToOne(mappedBy = "stock")
+    private StockDetail stockDetail;
 }

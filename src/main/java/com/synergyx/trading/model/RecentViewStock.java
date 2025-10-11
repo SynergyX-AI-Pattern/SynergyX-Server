@@ -19,11 +19,13 @@ public class RecentViewStock {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "stock_id", nullable = false)
-    private Long stockId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "stock_id", nullable = false)
+    private Stock stock;
 
     @Column(name = "viewed_at", nullable = false)
     private LocalDateTime viewedAt;

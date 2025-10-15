@@ -43,4 +43,14 @@ public interface StockOhlcvRepository extends JpaRepository<StockOhlcv, Long> {
     // entryAt (포함) 이전의 가장 최근의 종가 조회
     Optional<StockOhlcv> findTop1ByStockIdAndTimestampLessThanEqualOrderByTimestampDesc(Long stockId, LocalDateTime entryAt);
 
+    // ai top 20 - 현재가 조회
+    @Query("""
+                SELECT o FROM StockOhlcv o
+                WHERE o.timestamp = :timestamp
+                AND o.stock.id IN :stockIds
+            """)
+    List<StockOhlcv> findByTimestampAndStockIdIn(
+            @Param("timestamp") LocalDateTime timestamp,
+            @Param("stockIds") List<Long> stockIds
+    );
 }

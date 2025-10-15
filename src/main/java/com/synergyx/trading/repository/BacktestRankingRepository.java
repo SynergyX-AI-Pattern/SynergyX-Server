@@ -30,7 +30,7 @@ public interface BacktestRankingRepository extends JpaRepository<Backtest, Long>
     )
     FROM Backtest b
     WHERE b.executedAt BETWEEN :startOfMonth AND :endOfMonth
-      AND b.user.username <> '탈퇴회원'
+      AND b.user.username NOT IN ('탈퇴회원', 'admin')
       AND b.maxReturn = (
           SELECT MAX(b2.maxReturn)
           FROM Backtest b2

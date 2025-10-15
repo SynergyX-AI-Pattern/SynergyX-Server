@@ -37,4 +37,10 @@ public class StockDetail extends BaseEntity {
     @Version
     @Column(name = "version")
     private Long version; // 동시성 제어를 위해 추가
+
+    @Column(name = "ai_avg_increase", columnDefinition = "double default 0")
+    private Double aiAvgIncrease;
+
+    @Column(name = "ai_rank")
+    private Integer aiRank;
 }

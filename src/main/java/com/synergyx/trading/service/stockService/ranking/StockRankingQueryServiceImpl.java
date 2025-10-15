@@ -1,7 +1,5 @@
 package com.synergyx.trading.service.stockService.ranking;
 
-import com.synergyx.trading.apiPayload.code.status.ErrorStatus;
-import com.synergyx.trading.apiPayload.exception.GeneralException;
 import com.synergyx.trading.dto.stockDetail.RankedStockDTO;
 import com.synergyx.trading.model.Stock;
 import com.synergyx.trading.model.StockDetail;
@@ -19,10 +17,8 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.synergyx.trading.util.ParsingUtil.toFormattedNumber;
 import static com.synergyx.trading.util.ParsingUtil.toFormattedPercentage;
@@ -100,102 +96,64 @@ public class StockRankingQueryServiceImpl implements StockRankingQueryService {
     }
 
     /**
-     * AI 예측값의 상승폭을 기준으로 상위 20개 종목을 조회합니다.
+     * AI 예측값의 상승률을 기준으로 상위 20개 종목을 조회합니다.
      *
-     * @return AI 예측값의 상승폭 기준 TOP 20 종목 목록
+     * @return AI 예측값의 15일간 평균 상승률 기준 TOP 20 종목 목록
      */
     @Override
     @Transactional(readOnly = true)
     public List<RankedStockDTO> getAiTop20() {
         log.info("[StockRanking] AI 예측 기반 TOP20 랭킹 조회 시작");
 
-        // todo: 임시 데이터
-        List<Long> stockIds = IntStream.rangeClosed(1, 20)
-                .mapToObj(Long::valueOf)
+        // AI 예측 랭킹 상위 20개 (평균 상승률 기준)
+        List<StockDetail> topDetails = stockDetailRepository.findTop20ByOrderByAiRankAsc();
+        if (topDetails.isEmpty()) {
+            log.warn("[StockRanking] AI 예측 랭킹 데이터가 없습니다.");
+            return Collections.emptyList();
+        }
+
+        // 필요한 종목 ID 수집 및 매핑
+        List<Long> stockIds = topDetails.stream()
+                .map(detail -> detail.getStock().getId())
                 .toList();
 
-        // stock 조회
         Map<Long, Stock> stockMap = stockRepository.findAllById(stockIds).stream()
                 .collect(Collectors.toMap(Stock::getId, s -> s));
 
-        List<RankedStockDTO> result = IntStream.rangeClosed(1, 20)
-                .mapToObj(rank -> {
-                    long stockId = rank;
-                    Stock stock = Optional.ofNullable(stockMap.get(stockId))
-                            .orElseThrow(() -> new GeneralException(ErrorStatus.STOCK_NOT_FOUND));
+        // Ohlcv 종가 데이터 가져오기
+        LocalDateTime latestTimestamp = stockOhlcvRepository.findLatestTimestamp();
+        List<StockOhlcv> latestOhlcvs = stockOhlcvRepository.findByTimestampAndStockIdIn(latestTimestamp, stockIds);
+        Map<Long, StockOhlcv> ohlcvMap = latestOhlcvs.stream()
+                .collect(Collectors.toMap(ohlcv -> ohlcv.getStock().getId(), ohlcv -> ohlcv));
+
+        // DTO 변환
+        AtomicInteger rankCounter = new AtomicInteger(1);
+
+        List<RankedStockDTO> rankedList = topDetails.stream()
+                .map(detail -> {
+                    Stock stock = stockMap.get(detail.getStock().getId());
+                    StockOhlcv ohlcv = ohlcvMap.get(detail.getStock().getId());
+
+                    // 현재 종가
+                    String formattedPrice = (ohlcv != null)
+                            ? toFormattedNumber(ohlcv.getClose())
+                            : "N/A";
+
+                    // 예측 평균 상승률
+                    String formattedPredictedIncrease = toFormattedPercentage(detail.getAiAvgIncrease(), 2);
 
                     return RankedStockDTO.builder()
-                            .rank(rank)
-                            .stockId(stockId)
+                            .rank(rankCounter.getAndIncrement())
+                            .stockId(stock.getId())
                             .stockName(stock.getName())
-                            .price(getMockPrice(rank)) // todo: 임시 예측 종가
-                            .changeRate(getMockChangeRate(rank)) // todo: 임시 상승률
+                            .price(formattedPrice)
+                            .changeRate(formattedPredictedIncrease)
                             .imageUrl(stock.getImageUrl())
                             .build();
-                }).toList();
+                })
+                .toList();
 
-//        log.info("[StockRanking] AI 랭킹 조회 완료 - {}개 반환", result.size());
-        return result;
+//        log.info("[StockRanking] AI 예측 기반 TOP20 조회 완료 - {}개 반환", rankedList.size());
+        return rankedList;
     }
-
-    /**
-     * 임시 목데이터 - 예측 종가
-     * todo: delete
-     */
-    private String getMockPrice(int rank) {
-        return switch (rank) {
-            case 1 -> "59,100";
-            case 2 -> "112,000";
-            case 3 -> "74,300";
-            case 4 -> "48,900";
-            case 5 -> "126,000";
-            case 6 -> "191,000";
-            case 7 -> "91,400";
-            case 8 -> "474,000";
-            case 9 -> "513,000";
-            case 10 -> "169,000";
-            case 11 -> "28,500";
-            case 12 -> "41,600";
-            case 13 -> "495,000";
-            case 14 -> "19,600";
-            case 15 -> "144,000";
-            case 16 -> "23,900";
-            case 17 -> "345,000";
-            case 18 -> "151,000";
-            case 19 -> "85,200";
-            case 20 -> "92,300";
-            default -> "0";
-        };
-    }
-
-    /**
-     * 임시 목데이터 - 예측 상승률
-     * todo: delete
-     */
-    private String getMockChangeRate(int rank) {
-        return switch (rank) {
-            case 1 -> "2.25%";
-            case 2 -> "-0.82%";
-            case 3 -> "1.12%";
-            case 4 -> "-1.20%";
-            case 5 -> "0.95%";
-            case 6 -> "3.11%";
-            case 7 -> "2.78%";
-            case 8 -> "-0.65%";
-            case 9 -> "0.85%";
-            case 10 -> "1.02%";
-            case 11 -> "2.00%";
-            case 12 -> "-0.45%";
-            case 13 -> "1.57%";
-            case 14 -> "-1.90%";
-            case 15 -> "0.65%";
-            case 16 -> "1.33%";
-            case 17 -> "0.48%";
-            case 18 -> "-0.95%";
-            case 19 -> "0.75%";
-            case 20 -> "1.18%";
-            default -> "0.00%";
-        };
-    }
-
 }

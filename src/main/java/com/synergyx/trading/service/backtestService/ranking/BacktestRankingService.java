@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import static com.synergyx.trading.util.NumberUtil.round;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +65,13 @@ public class BacktestRankingService {
 
         // 순위 부여
         assignRanks(rankings);
+
+        // 반올림 처리
+        rankings.forEach(r -> {
+            r.setWinRate(round(r.getWinRate()));
+            r.setAverageReturn(round(r.getAverageReturn()));
+            r.setMaxReturn(round(r.getMaxReturn()));
+        });
 
         return rankings;
     }

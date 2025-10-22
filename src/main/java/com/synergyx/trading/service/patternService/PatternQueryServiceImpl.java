@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import static com.synergyx.trading.util.NumberUtil.round;
 
 @Service
 @RequiredArgsConstructor
@@ -40,8 +41,8 @@ public class PatternQueryServiceImpl implements PatternQueryService {
                     List<PatternResponseDTO.BacktestSummaryDTO> summaries = backtests.stream()
                             .map(b -> PatternResponseDTO.BacktestSummaryDTO.builder()
                                     .stockName(b.getStock().getName())
-                                    .averageReturn(b.getAverageReturn())
-                                    .winRate(b.getWinRate())
+                                    .averageReturn(round(b.getAverageReturn()))
+                                    .winRate(round(b.getWinRate()))
                                     .matchedCount(b.getMatchedCount())
                                     .executedAt(b.getExecutedAt())
                                     .build())
@@ -81,10 +82,10 @@ public class PatternQueryServiceImpl implements PatternQueryService {
                 .executedAt(bt.getExecutedAt())
                 .startDate(bt.getStartDate())
                 .endDate(bt.getEndDate())
-                .winRate(bt.getWinRate())
-                .averageReturn(bt.getAverageReturn())
+                .winRate(round(bt.getWinRate()))
+                .averageReturn(round(bt.getAverageReturn()))
                 .matchedCount(bt.getMatchedCount())
-                .maxReturn(bt.getMaxReturn())
+                .maxReturn(round(bt.getMaxReturn()))
                 .maxReturnDate(bt.getMaxReturnDate())
                 .build()
         ).orElse(null);

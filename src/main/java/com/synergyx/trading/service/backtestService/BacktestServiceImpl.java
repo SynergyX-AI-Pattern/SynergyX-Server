@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import com.synergyx.trading.service.backtestService.client.BacktestClientService;
-
+import static com.synergyx.trading.util.NumberUtil.round;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -97,15 +97,15 @@ public class BacktestServiceImpl implements BacktestService {
                 .matchedCount(saved.getMatchedCount())
                 .startDate(saved.getStartDate())
                 .endDate(saved.getEndDate())
-                .winRate(saved.getWinRate())
-                .averageReturn(saved.getAverageReturn())
-                .maxReturn(saved.getMaxReturn())
+                .winRate(round(saved.getWinRate()))
+                .averageReturn(round(saved.getAverageReturn()))
+                .maxReturn(round(saved.getMaxReturn()))
                 .maxReturnDate(saved.getMaxReturnDate())
-                .minReturn(saved.getMinReturn())
+                .minReturn(round(saved.getMinReturn()))
                 .minReturnDate(saved.getMinReturnDate())
-                .totalReturn(saved.getTotalReturn())
+                .totalReturn(round(saved.getTotalReturn()))
                 .lastMatchedDate(saved.getLastMatchedDate())
-                .lastMatchedReturn(saved.getLastMatchedReturn())
+                .lastMatchedReturn(round(saved.getLastMatchedReturn()))
                 .highlightRange(
                         (saved.getHighlightFromDate() != null && saved.getHighlightToDate() != null)
                                 ? BacktestResponseDTO.HighlightRangeDTO.builder()
@@ -139,16 +139,16 @@ public class BacktestServiceImpl implements BacktestService {
                 .executedAt(backtest.getExecutedAt())
                 .startDate(backtest.getStartDate())
                 .endDate(backtest.getEndDate())
-                .winRate(backtest.getWinRate())
-                .averageReturn(backtest.getAverageReturn())
+                .winRate(round(backtest.getWinRate()))
+                .averageReturn(round(backtest.getAverageReturn()))
                 .matchedCount(backtest.getMatchedCount())
                 .maxReturnDate(backtest.getMaxReturnDate())
-                .maxReturn(backtest.getMaxReturn())
+                .maxReturn(round(backtest.getMaxReturn()))
                 .minReturnDate(backtest.getMinReturnDate())
-                .minReturn(backtest.getMinReturn())
+                .minReturn(round(backtest.getMinReturn()))
                 .lastMatchedDate(backtest.getLastMatchedDate())
-                .lastMatchedReturn(backtest.getLastMatchedReturn())
-                .totalReturn(backtest.getTotalReturn())
+                .lastMatchedReturn(round(backtest.getLastMatchedReturn()))
+                .totalReturn(round(backtest.getTotalReturn()))
                 .highlightRange(
                         (backtest.getHighlightFromDate() != null && backtest.getHighlightToDate() != null)
                                 ? BacktestResponseDTO.HighlightRangeDTO.builder()
@@ -178,8 +178,8 @@ public class BacktestServiceImpl implements BacktestService {
                 .backtestId(bt.getId())
                 .stockName(bt.getStock().getName())
                 .executedAt(bt.getExecutedAt())
-                .winRate(bt.getWinRate())
-                .averageReturn(bt.getAverageReturn())
+                .winRate(round(bt.getWinRate()))
+                .averageReturn(round(bt.getAverageReturn()))
                 .matchedCount(bt.getMatchedCount())
                 .build());
     }

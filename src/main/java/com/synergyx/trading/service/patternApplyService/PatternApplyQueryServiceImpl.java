@@ -55,6 +55,7 @@ public class PatternApplyQueryServiceImpl implements PatternApplyQueryService {
                         .tolerance(pattern.getTolerance())
                         .periodValue(pattern.getPeriodValue())
                         .periodUnit(String.valueOf(pattern.getPeriodUnit()))
+                        .isAlertEnabled(patternApply.getIsAlertEnabled())
                         .build())
                 .backtestResult(backtest != null ? PatternApplyResponseDTO.PatternApplyDetailDTO.BacktestResultDTO.builder()
                         .backtestId(backtest.getId())

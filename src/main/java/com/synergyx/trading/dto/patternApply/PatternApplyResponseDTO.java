@@ -78,6 +78,7 @@ public class PatternApplyResponseDTO {
             private Double tolerance;
             private Integer periodValue;
             private String periodUnit;
+            private Boolean isAlertEnabled;
         }
         @Getter
         @Builder

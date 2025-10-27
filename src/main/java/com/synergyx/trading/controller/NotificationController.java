@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/notifications")
+@RequestMapping("test/notifications")
 @Tag(name = "알림 API", description = "알림 관련 API 입니다.")
 public class NotificationController {
 
@@ -32,7 +32,7 @@ public class NotificationController {
     public ResponseEntity<?> sendAndSaveNotification(
             @RequestBody @Valid NotificationRequestDTO request
     ) {
-        Long userId = userContext.getCurrentUserId();
+        Long userId = request.getUserId();
         NotificationResponseDTO result = notificationService.sendAndSaveNotification(userId, request);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(

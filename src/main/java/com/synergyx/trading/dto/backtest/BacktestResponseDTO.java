@@ -100,6 +100,7 @@ public class BacktestResponseDTO  {
         private Double winRate; // 승률
         private Double averageReturn; // 평균 수익률
         private Integer matchedCount; // 패턴 매칭 횟수
+        private LocalDate startDate; // 백테스트 시작일
     }
 
     // 백테스팅 결과 목록 조회

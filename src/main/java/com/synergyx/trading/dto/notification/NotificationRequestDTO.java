@@ -6,6 +6,7 @@ import lombok.Getter;
 @Builder
 @Getter
 public class NotificationRequestDTO {
+    private Long userId;
     private String title;
     private String message;
     private String type;

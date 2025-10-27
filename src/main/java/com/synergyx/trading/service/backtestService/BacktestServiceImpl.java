@@ -181,6 +181,7 @@ public class BacktestServiceImpl implements BacktestService {
                 .winRate(round(bt.getWinRate()))
                 .averageReturn(round(bt.getAverageReturn()))
                 .matchedCount(bt.getMatchedCount())
+                .startDate(bt.getStartDate())
                 .build());
     }
 

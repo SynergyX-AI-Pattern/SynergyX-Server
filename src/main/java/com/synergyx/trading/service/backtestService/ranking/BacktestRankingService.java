@@ -42,6 +42,21 @@ public class BacktestRankingService {
         // Repository 호출
         List<BacktestRankingDTO> rankings = backtestRankingRepository.findMonthlyUserMaxReturnRankings(startOfMonth, endOfMonth, PageRequest.of(0, limit));
 
+        // 최대 수익률이 같을 경우, userId 중복 나타나는 현상 발생
+        // 최대 수익률이 더 높은 1건 채택
+        rankings = rankings.stream()
+                .collect(Collectors.toMap(
+                        BacktestRankingDTO::getUserId,
+                        Function.identity(),
+                        (existing, replacement) ->
+                                replacement.getMaxReturn() > existing.getMaxReturn()
+                                        ? replacement : existing
+                ))
+                .values()
+                .stream()
+                .sorted((a, b) -> Double.compare(b.getMaxReturn(), a.getMaxReturn())) // 수익률 내림차순 재정렬
+                .toList();
+
         // 백테스트 ID 목록 추출
         List<Long> backtestIds = rankings.stream()
                 .map(BacktestRankingDTO::getBacktestId)

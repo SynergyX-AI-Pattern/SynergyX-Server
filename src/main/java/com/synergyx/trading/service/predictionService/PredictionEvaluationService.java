@@ -22,7 +22,9 @@ public class PredictionEvaluationService {
         List<Object[]> rows = predictionRepository.findPredictionErrorsRaw();
         List<PredictionErrorDTO> errors = new ArrayList<>();
 
-        double sumError = 0.0;
+        double sumErrorPct = 0.0;   // MAPE 계산용
+        double sumSquaredError = 0.0; // RMSE 계산용
+        double sumActual = 0.0;     // NRMSE 보정용 (평균 실제값)
         int count = 0;
 
         for (Object[] row : rows) {
@@ -33,21 +35,34 @@ public class PredictionEvaluationService {
             Double actual = ((Number) row[4]).doubleValue();
             Double errorPct = ((Number) row[5]).doubleValue();
 
+            // DTO 생성
             PredictionErrorDTO dto = new PredictionErrorDTO(
                     stockId, stockCode, targetDate, predicted, actual, errorPct
             );
             errors.add(dto);
 
-            sumError += errorPct;
-            count++;
+            // 오차 계산
+            if (actual != null && actual != 0) {
+                double diff = predicted - actual;
+                sumErrorPct += errorPct;
+                sumSquaredError += diff * diff;
+                sumActual += actual;
+                count++;
+            }
         }
 
-        double avgError = (count > 0) ? sumError / count : 0.0;
+        // 지표 계산
+        double avgErrorPct = (count > 0) ? sumErrorPct / count : 0.0; // MAPE (%)
+        double rmse = (count > 0) ? Math.sqrt(sumSquaredError / count) : 0.0;
+        double meanActual = (count > 0) ? (sumActual / count) : 0.0;
+        double nrmse = (meanActual != 0) ? (rmse / meanActual * 100.0) : 0.0; // NRMSE (%)
 
+        // 결과 맵 구성
         Map<String, Object> result = new HashMap<>();
         result.put("errors", errors);
-        result.put("avgErrorPct", avgError);
+        result.put("avgErrorPct", avgErrorPct); // 평균 절대 오차율 (MAPE)
+        result.put("rmse", rmse);               // RMSE (단위: 원)
+        result.put("nrmsePct", nrmse);          // 정규화 RMSE (단위 무관, %)
         return result;
     }
 }
-

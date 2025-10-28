@@ -29,7 +29,7 @@ public class SecurityConfig {
             "/auth/signup",
             "/auth/login",
             "/test/**",
-            "/prediction/**"
+            "/predictions/**"
     };
 
     private static final String[] SWAGGER_WHITELIST = {

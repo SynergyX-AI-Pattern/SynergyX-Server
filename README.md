@@ -9,8 +9,9 @@
 > **AI 주가 예측 및 차트 패턴 기반 실시간 감지·백테스팅 시스템**  
 > 🏆 한이음 드림업 장려상 수상작
 
-[🏠 Organization](https://github.com/SynergyX-AI-Pattern) • [📗 ML Server](https://github.com/SynergyX-AI-Pattern/SynergyX-ML-Server) • [📙 Client](https://github.com/SynergyX-AI-Pattern/SynergyX-Client)
-
+[![Organization](https://img.shields.io/badge/🏠_Organization-9D84B7?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SynergyX-AI-Pattern)
+[![ML Server](https://img.shields.io/badge/📗_ML_Server-3396D3?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SynergyX-AI-Pattern/SynergyX-ML-Server)
+[![Client](https://img.shields.io/badge/📱_Client-FF8040?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SynergyX-AI-Pattern/SynergyX-Client)
 
 
 <img width="100%" alt="1-6f60498e" src="https://github.com/user-attachments/assets/24c17eaf-4506-4365-9752-37737730047c" />
@@ -20,7 +21,7 @@
 ## 📌 Overview
 **PatternCatcher**는 개인 투자자가 자신만의 차트 패턴을 정의하고, <br>  실시간 감지 및 백테스팅을 통해 투자 전략의 유효성을 검증할 수 있는 AI 투자 보조 시스템입니다.
 
-**Main Server**는 사용자 인증, 종목 데이터 수집, 패턴 관리, FCM 푸시 알림 등 **핵심 비즈니스 로직을 담당하는 Spring Boot 기반 RESTful API 서버**입니다. <br>   모든 클라이언트 요청을 처리하고, AI 기능(패턴 감지, 백테스팅, 주가 예측)은 [ML Server](https://github.com/SynergyX-AI-Pattern/SynergyX-ML-Server)와 연동하여 수행합니다.
+**Main Server**는 사용자 인증, 종목 데이터 수집, 패턴 관리, FCM 푸시 알림 등 **핵심 비즈니스 로직을 담당하는 Spring Boot 기반 RESTful API 서버**입니다. 모든 클라이언트 요청을 처리하고, AI 기능(패턴 감지, 백테스팅, 주가 예측)은 [ML Server](https://github.com/SynergyX-AI-Pattern/SynergyX-ML-Server)와 연동하여 수행합니다.
 
 ### 주요 역할
 - 🔐 **사용자 인증/인가** - JWT 기반

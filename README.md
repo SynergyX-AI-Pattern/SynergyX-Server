@@ -11,7 +11,7 @@
 
 [![Organization](https://img.shields.io/badge/🏠_Organization-9D84B7?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SynergyX-AI-Pattern)
 [![ML Server](https://img.shields.io/badge/📗_ML_Server-3396D3?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SynergyX-AI-Pattern/SynergyX-ML-Server)
-[![Client](https://img.shields.io/badge/📱_Client-FF8040?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SynergyX-AI-Pattern/SynergyX-Client)
+[![Client](https://img.shields.io/badge/📱_Client-B87C4C?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SynergyX-AI-Pattern/SynergyX-Client)
 
 
 <img width="100%" alt="1-6f60498e" src="https://github.com/user-attachments/assets/24c17eaf-4506-4365-9752-37737730047c" />

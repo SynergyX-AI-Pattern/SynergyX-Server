@@ -60,7 +60,7 @@ public class PredictionEvaluationService {
         // 결과 맵 구성
         Map<String, Object> result = new HashMap<>();
         result.put("errors", errors);
-        result.put("avgErrorPct", avgErrorPct); // 평균 절대 오차율 (MAPE)
+        result.put("mape", avgErrorPct); // 평균 절대 오차율 (MAPE)
         result.put("rmse", rmse);               // RMSE (단위: 원)
         result.put("nrmsePct", nrmse);          // 정규화 RMSE (단위 무관, %)
         return result;
